@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Highlighter Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .test-area {
+            background: #333;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+            position: relative;
+            min-height: 300px;
+        }
+        .bible-text {
+            color: #e0e0e0;
+            line-height: 1.6;
+            font-size: 16px;
+            position: relative;
+            z-index: 1;
+        }
+        .annotation-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: auto;
+            z-index: 2;
+            border: 1px solid #666;
+        }
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tool-btn {
+            padding: 10px 15px;
+            background: #404040;
+            border: 2px solid #555;
+            color: #e0e0e0;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        .tool-btn.selected {
+            background: #666;
+            border-color: #888;
+        }
+        .tool-btn:hover {
+            background: #555;
+        }
+        .status {
+            background: #4a4a4a;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Simple Highlighter Test</h1>
+        
+        <div class="toolbar">
+            <button class="tool-btn selected" data-tool="pen">🖊️ Pen</button>
+            <button class="tool-btn" data-tool="highlight">🖍️ Highlighter</button>
+            <button class="tool-btn" data-tool="erase">🧽 Eraser</button>
+            <button class="tool-btn" onclick="clearAll()">🗑️ Clear</button>
+        </div>
+
+        <div class="test-area">
+            <div class="bible-text">
+                <h2>Test Text</h2>
+                <p>This is a test paragraph to verify that the highlighter tool works correctly. Draw with the pen first, then switch to highlighter and verify that pen marks remain visible.</p>
+                <p>Second paragraph for more testing. Try highlighting over pen marks to see if they are preserved.</p>
+            </div>
+        </div>
+
+        <div class="status" id="status">
+            Ready to test...
+        </div>
+    </div>
+
+    <script>
+        // Simple annotation test
+        let currentTool = 'pen';
+        let drawing = false;
+        let lastPoint = null;
+        let canvas = null;
+        let ctx = null;
+        let strokeHistory = [];
+        
+        // Initialize canvas
+        function initCanvas() {
+            const testArea = document.querySelector('.test-area');
+            const bibleText = document.querySelector('.bible-text');
+            
+            canvas = document.createElement('canvas');
+            canvas.className = 'annotation-canvas';
+            canvas.width = bibleText.offsetWidth;
+            canvas.height = bibleText.offsetHeight;
+            testArea.appendChild(canvas);
+            
+            ctx = canvas.getContext('2d');
+            ctx.strokeStyle = '#ff0000';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            updateStatus('Canvas initialized');
+        }
+        
+        // Tool selection
+        document.querySelectorAll('.tool-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.dataset.tool) {
+                    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    currentTool = btn.dataset.tool;
+                    updateStatus(`Tool changed to: ${currentTool}`);
+                }
+            });
+        });
+        
+        // Drawing functions
+        function getPointerPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+        
+        function startDrawing(e) {
+            drawing = true;
+            lastPoint = getPointerPos(e);
+            updateStatus(`Started drawing with ${currentTool}`);
+        }
+        
+        function draw(e) {
+            if (!drawing) return;
+            
+            const point = getPointerPos(e);
+            
+            // Save stroke data
+            if (!window.currentStroke) {
+                window.currentStroke = {
+                    type: currentTool,
+                    points: [lastPoint],
+                    color: currentTool === 'highlight' ? 'rgba(255,255,0,0.30)' : '#ff0000',
+                    size: currentTool === 'highlight' ? 20 : 4
+                };
+            }
+            window.currentStroke.points.push(point);
+            
+            // Clear canvas and redraw all strokes (simulating the fixed logic)
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw all saved strokes
+            strokeHistory.forEach(stroke => {
+                if (stroke.points && stroke.points.length > 1) {
+                    ctx.save();
+                    ctx.globalAlpha = stroke.type === 'highlight' ? 0.3 : 1.0;
+                    ctx.globalCompositeOperation = stroke.type === 'erase' ? 'destination-out' : 'source-over';
+                    ctx.strokeStyle = stroke.color;
+                    ctx.lineWidth = stroke.size;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+                    for (let i = 1; i < stroke.points.length; i++) {
+                        ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+                    }
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            });
+            
+            // Draw current stroke
+            if (window.currentStroke.points.length > 1) {
+                ctx.save();
+                ctx.globalAlpha = currentTool === 'highlight' ? 0.3 : 1.0;
+                ctx.globalCompositeOperation = currentTool === 'erase' ? 'destination-out' : 'source-over';
+                ctx.strokeStyle = window.currentStroke.color;
+                ctx.lineWidth = window.currentStroke.size;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                ctx.moveTo(window.currentStroke.points[0].x, window.currentStroke.points[0].y);
+                for (let i = 1; i < window.currentStroke.points.length; i++) {
+                    ctx.lineTo(window.currentStroke.points[i].x, window.currentStroke.points[i].y);
+                }
+                ctx.stroke();
+                ctx.restore();
+            }
+            
+            lastPoint = point;
+        }
+        
+        function endDrawing() {
+            if (drawing && window.currentStroke && window.currentStroke.points.length > 1) {
+                strokeHistory.push(window.currentStroke);
+                updateStatus(`Finished ${currentTool} stroke - ${strokeHistory.length} total strokes`);
+            }
+            drawing = false;
+            window.currentStroke = null;
+        }
+        
+        function clearAll() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            strokeHistory = [];
+            updateStatus('All annotations cleared');
+        }
+        
+        function updateStatus(message) {
+            const status = document.getElementById('status');
+            status.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            console.log(message);
+        }
+        
+        // Event listeners
+        canvas.addEventListener('pointerdown', startDrawing);
+        canvas.addEventListener('pointermove', draw);
+        canvas.addEventListener('pointerup', endDrawing);
+        canvas.addEventListener('pointerleave', endDrawing);
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            initCanvas();
+            updateStatus('Simple test loaded - try drawing with pen, then switch to highlighter');
+        });
+    </script>
+</body>
+</html> 

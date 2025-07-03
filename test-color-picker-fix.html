@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Picker Fix Test - Bible App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="enhanced-tools.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #2a2a2a;
+            border-radius: 12px;
+        }
+        
+        .header h1 {
+            color: #4a9eff;
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+        }
+        
+        .header p {
+            color: #888;
+            margin: 0;
+            font-size: 1.1em;
+        }
+        
+        .test-instructions {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 1px solid #3a3a3a;
+        }
+        
+        .test-instructions h3 {
+            color: #4a9eff;
+            margin: 0 0 15px 0;
+        }
+        
+        .test-instructions ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .test-instructions li {
+            margin: 8px 0;
+            color: #ccc;
+        }
+        
+        .test-instructions .highlight {
+            background: #4a9eff;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .demo-text {
+            background: #333;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            line-height: 1.8;
+        }
+        
+        .demo-text h4 {
+            color: #4a9eff;
+            margin: 0 0 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Color Picker Fix Test</h1>
+            <p>Testing the advanced color picker positioning and timing fixes</p>
+        </div>
+        
+        <!-- Toolbar (same as main app) -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <div class="browser-tabs">
+                    <div class="tab-bar">
+                        <div class="tab active">
+                            <span class="tab-title">Test Tab</span>
+                            <button class="tab-close">×</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="toolbar-right">
+                <div class="tool-slider" id="toolSlider">
+                    <div class="tool-wrapper">
+                        <button class="tool-icon selected" data-tool="pen" id="penToolBtn"><i class="fas fa-pen"></i></button>
+                        <div class="pen-color-dropdown" id="penColorDropdown">
+                            <button class="pen-color-option" style="--pen-color: #fefefe;" data-color="#fefefe" title="White">&nbsp;</button>
+                            <button class="pen-color-option" style="--pen-color: #ff3333;" data-color="#ff3333" title="Red">&nbsp;</button>
+                            <button class="pen-color-option" style="--pen-color: #0090ff;" data-color="#0090ff" title="Blue">&nbsp;</button>
+                            <button class="pen-color-option" style="--pen-color: #00ff00;" data-color="#00ff00" title="Green">&nbsp;</button>
+                            <button class="pen-color-option" style="--pen-color: #ffff00;" data-color="#ffff00" title="Yellow">&nbsp;</button>
+                            <div class="advanced-arrow" data-tool="pen">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        <div class="size-slider-popup" id="penSizeSliderPopup">
+                            <input type="range" min="2" max="40" step="1" value="4" class="size-slider" id="penSizeSlider">
+                        </div>
+                        <button class="tool-icon" data-tool="highlight" id="highlightToolBtn"><i class="fas fa-highlighter"></i></button>
+                        <div class="highlighter-color-dropdown" id="highlighterColorDropdown">
+                            <button class="highlighter-color-option" style="--highlighter-color: #fefefe;" data-color="#fefefe" title="White">&nbsp;</button>
+                            <button class="highlighter-color-option" style="--highlighter-color: #ff3333;" data-color="#ff3333" title="Red">&nbsp;</button>
+                            <button class="highlighter-color-option" style="--highlighter-color: #0090ff;" data-color="#0090ff" title="Blue">&nbsp;</button>
+                            <button class="highlighter-color-option" style="--highlighter-color: #00ff00;" data-color="#00ff00" title="Green">&nbsp;</button>
+                            <button class="highlighter-color-option" style="--highlighter-color: #ffff00;" data-color="#ffff00" title="Yellow">&nbsp;</button>
+                            <div class="advanced-arrow" data-tool="highlight">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="tool-icon" data-tool="erase"><i class="fas fa-eraser"></i></button>
+                </div>
+                <button class="toolbar-btn" id="undoBtn" title="Undo" tabindex="-1">
+                    <i class="fas fa-undo"></i>
+                </button>
+                <button class="toolbar-btn" id="redoBtn" title="Redo" tabindex="-1">
+                    <i class="fas fa-redo"></i>
+                </button>
+                <button class="toolbar-btn" id="resetBtn" title="Clear All" tabindex="-1">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="test-instructions">
+            <h3><i class="fas fa-flask"></i> Test Instructions</h3>
+            <ol>
+                <li><span class="highlight">Click on the pen tool</span> - The simple color dropdown should appear below the pen button</li>
+                <li><span class="highlight">Click on the highlighter tool</span> - The simple color dropdown should appear below the highlighter button</li>
+                <li><span class="highlight">Test simple color selection</span> - Click on different colors in the simple dropdowns to verify they work</li>
+                <li><span class="highlight">Click the down arrow (▼)</span> in either color dropdown - The advanced color picker should animate down from the simple dropdown, and <strong>both</strong> pen and highlighter simple dropdowns should remain open</li>
+                <li><span class="highlight">Test synchronized closing</span> - Click outside the advanced picker or click the arrow again - <strong>both</strong> simple dropdowns should close simultaneously</li>
+                <li><span class="highlight">Test click outside behavior</span> - Open the advanced picker, then click outside both the advanced picker and the simple dropdowns - everything should close together</li>
+                <li><span class="highlight">Test positioning</span> - Try clicking the advanced arrows when the dropdowns are near the edges of the screen to ensure they don't go off-screen</li>
+            </ol>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #333; border-radius: 8px;">
+                <h4 style="color: #4a9eff; margin: 0 0 10px 0;">Debug Tests:</h4>
+                <button id="testPenDropdown" style="background: #4a9eff; color: white; border: none; padding: 8px 12px; border-radius: 4px; margin-right: 10px; cursor: pointer;">Test Pen Dropdown</button>
+                <button id="testHighlighterDropdown" style="background: #4a9eff; color: white; border: none; padding: 8px 12px; border-radius: 4px; margin-right: 10px; cursor: pointer;">Test Highlighter Dropdown</button>
+                <button id="testHideAll" style="background: #ff6b6b; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">Hide All Dropdowns</button>
+            </div>
+        </div>
+        
+        <div class="demo-text">
+            <h4>Expected Behavior:</h4>
+            <ul>
+                <li><strong>Simple dropdowns work:</strong> Clicking on pen or highlighter tools should open their respective simple color pickers</li>
+                <li><strong>Color selection works:</strong> Clicking on colors in the simple dropdowns should update the tool colors</li>
+                <li><strong>Both simple dropdowns stay open:</strong> When you click the advanced arrow, both the pen and highlighter simple color pickers should remain visible</li>
+                <li><strong>Correct positioning:</strong> The advanced color picker should appear directly below the simple dropdown for both pen and highlighter tools</li>
+                <li><strong>Smooth animation:</strong> The advanced picker should animate smoothly from the simple dropdown position</li>
+                <li><strong>Synchronized closing:</strong> When the advanced picker closes (by clicking outside or clicking the arrow again), both simple dropdowns should close at the same time</li>
+                <li><strong>No interference:</strong> The main app's click-outside behavior should not interfere with the enhanced tools when the advanced picker is open</li>
+                <li><strong>No off-screen positioning:</strong> The advanced picker should automatically adjust its position if it would go off-screen</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script src="enhanced-tools.js"></script>
+    <script>
+        // Initialize enhanced tools
+        document.addEventListener('DOMContentLoaded', () => {
+            // Create enhanced tools instance
+            window.enhancedTools = new EnhancedTools();
+            
+            // Add some basic tool functionality for testing
+            const penBtn = document.getElementById('penToolBtn');
+            const highlightBtn = document.getElementById('highlightToolBtn');
+            const penColorDropdown = document.getElementById('penColorDropdown');
+            const highlighterColorDropdown = document.getElementById('highlighterColorDropdown');
+            
+            // Pen tool click
+            penBtn.addEventListener('click', (e) => {
+                // Toggle color dropdown
+                penColorDropdown.classList.toggle('show');
+                highlighterColorDropdown.classList.remove('show');
+            });
+            
+            // Highlighter tool click
+            highlightBtn.addEventListener('click', (e) => {
+                // Toggle color dropdown
+                highlighterColorDropdown.classList.toggle('show');
+                penColorDropdown.classList.remove('show');
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!penColorDropdown.contains(e.target) && !penBtn.contains(e.target)) {
+                    penColorDropdown.classList.remove('show');
+                }
+                if (!highlighterColorDropdown.contains(e.target) && !highlightBtn.contains(e.target)) {
+                    highlighterColorDropdown.classList.remove('show');
+                }
+            });
+            
+            // Color option clicks
+            penColorDropdown.querySelectorAll('.pen-color-option').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const color = btn.getAttribute('data-color');
+                    penBtn.style.setProperty('--pen-color', color);
+                    penColorDropdown.classList.remove('show');
+                });
+            });
+            
+            highlighterColorDropdown.querySelectorAll('.highlighter-color-option').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const color = btn.getAttribute('data-color');
+                    highlightBtn.style.setProperty('--highlighter-color', color);
+                    highlighterColorDropdown.classList.remove('show');
+                });
+            });
+            
+            // Initialize enhanced tools for this test page
+            if (window.enhancedTools) {
+                // Override the startDrawing method for this test page
+                const originalStartDrawing = window.enhancedTools.startDrawing;
+                window.enhancedTools.startDrawing = function(e, canvas, tabId) {
+                    // For test page, let the test page handle drawing
+                    return false;
+                };
+            }
+            
+            // Debug test buttons
+            document.getElementById('testPenDropdown').addEventListener('click', () => {
+                const penDropdown = document.getElementById('penColorDropdown');
+                penDropdown.classList.add('show');
+                console.log('Debug: Manually showing pen dropdown');
+                console.log('Debug: penDropdown classes:', penDropdown.className);
+                console.log('Debug: penDropdown transform:', window.getComputedStyle(penDropdown).transform);
+            });
+            
+            document.getElementById('testHighlighterDropdown').addEventListener('click', () => {
+                const highlighterDropdown = document.getElementById('highlighterColorDropdown');
+                highlighterDropdown.classList.add('show');
+                console.log('Debug: Manually showing highlighter dropdown');
+                console.log('Debug: highlighterDropdown classes:', highlighterDropdown.className);
+                console.log('Debug: highlighterDropdown transform:', window.getComputedStyle(highlighterDropdown).transform);
+            });
+            
+            document.getElementById('testHideAll').addEventListener('click', () => {
+                const penDropdown = document.getElementById('penColorDropdown');
+                const highlighterDropdown = document.getElementById('highlighterColorDropdown');
+                penDropdown.classList.remove('show');
+                highlighterDropdown.classList.remove('show');
+                console.log('Debug: Manually hiding all dropdowns');
+            });
+        });
+    </script>
+</body>
+</html> 

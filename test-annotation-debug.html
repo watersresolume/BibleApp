@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annotation Debug Test</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test-area { 
+            position: relative; 
+            width: 100%; 
+            height: 500px; 
+            border: 2px solid #ccc; 
+            margin: 20px 0;
+            background: white;
+        }
+        canvas { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            cursor: crosshair;
+            touch-action: none;
+        }
+        .tools { margin: 10px 0; }
+        .tool-btn { 
+            padding: 10px 15px; 
+            margin: 5px; 
+            border: 2px solid #ccc; 
+            background: white; 
+            cursor: pointer; 
+        }
+        .tool-btn.active { 
+            background: #007bff; 
+            color: white; 
+            border-color: #007bff; 
+        }
+        .debug { 
+            margin: 20px 0; 
+            padding: 10px; 
+            background: #f8f9fa; 
+            border: 1px solid #ddd;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Annotation Debug Test</h1>
+        <p>This simplified test helps debug the annotation persistence and mouse performance issues.</p>
+        
+        <div class="tools">
+            <button class="tool-btn active" onclick="setTool('pen')">Pen</button>
+            <button class="tool-btn" onclick="setTool('highlight')">Highlighter</button>
+            <button class="tool-btn" onclick="clearCanvas()">Clear</button>
+        </div>
+        
+        <div class="test-area">
+            <canvas id="mainCanvas"></canvas>
+            <canvas id="overlayCanvas"></canvas>
+        </div>
+        
+        <div id="debug" class="debug">Debug log will appear here...</div>
+    </div>
+
+    <script>
+        // Simple annotation system for debugging
+        let currentTool = 'pen';
+        let drawing = false;
+        let strokes = [];
+        let currentStroke = [];
+        
+        // Canvas setup
+        const container = document.querySelector('.test-area');
+        const mainCanvas = document.getElementById('mainCanvas');
+        const overlayCanvas = document.getElementById('overlayCanvas');
+        const debugDiv = document.getElementById('debug');
+        
+        function resizeCanvases() {
+            const rect = container.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            [mainCanvas, overlayCanvas].forEach(canvas => {
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                canvas.style.width = rect.width + 'px';
+                canvas.style.height = rect.height + 'px';
+                
+                const ctx = canvas.getContext('2d');
+                ctx.scale(dpr, dpr);
+            });
+        }
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            debugDiv.textContent += `[${timestamp}] ${message}\n`;
+            debugDiv.scrollTop = debugDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function setTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            log(`Tool changed to: ${tool}`);
+        }
+        
+        function getPointer(e) {
+            const rect = overlayCanvas.getBoundingClientRect();
+            if (e.touches && e.touches.length > 0) {
+                return {
+                    x: e.touches[0].clientX - rect.left,
+                    y: e.touches[0].clientY - rect.top,
+                    type: 'touch'
+                };
+            } else {
+                return {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top,
+                    type: 'mouse'
+                };
+            }
+        }
+        
+        function startDrawing(e) {
+            e.preventDefault();
+            drawing = true;
+            currentStroke = [];
+            
+            const pointer = getPointer(e);
+            currentStroke.push(pointer);
+            
+            log(`Started drawing with ${pointer.type} at (${Math.round(pointer.x)}, ${Math.round(pointer.y)})`);
+            log(`BEFORE: Total strokes in memory: ${strokes.length}`);
+        }
+        
+        function draw(e) {
+            if (!drawing) return;
+            e.preventDefault();
+            
+            const pointer = getPointer(e);
+            currentStroke.push(pointer);
+            
+            // Draw on overlay canvas for real-time feedback
+            const ctx = overlayCanvas.getContext('2d');
+            ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            
+            if (currentStroke.length >= 2) {
+                ctx.strokeStyle = currentTool === 'highlight' ? 'yellow' : 'black';
+                ctx.lineWidth = currentTool === 'highlight' ? 10 : 2;
+                ctx.globalAlpha = currentTool === 'highlight' ? 0.3 : 1.0;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                
+                ctx.beginPath();
+                ctx.moveTo(currentStroke[0].x, currentStroke[0].y);
+                
+                if (pointer.type === 'touch') {
+                    // Smooth curves for touch
+                    for (let i = 1; i < currentStroke.length - 1; i++) {
+                        const midX = (currentStroke[i].x + currentStroke[i + 1].x) / 2;
+                        const midY = (currentStroke[i].y + currentStroke[i + 1].y) / 2;
+                        ctx.quadraticCurveTo(currentStroke[i].x, currentStroke[i].y, midX, midY);
+                    }
+                    if (currentStroke.length > 1) {
+                        ctx.lineTo(currentStroke[currentStroke.length - 1].x, currentStroke[currentStroke.length - 1].y);
+                    }
+                } else {
+                    // Precise lines for mouse
+                    for (let i = 1; i < currentStroke.length; i++) {
+                        ctx.lineTo(currentStroke[i].x, currentStroke[i].y);
+                    }
+                }
+                
+                ctx.stroke();
+            }
+        }
+        
+        function endDrawing(e) {
+            if (!drawing) return;
+            drawing = false;
+            
+            // Save stroke to memory
+            strokes.push({
+                tool: currentTool,
+                points: [...currentStroke],
+                inputType: currentStroke[0] ? currentStroke[0].type : 'unknown'
+            });
+            
+            log(`Finished stroke with ${currentStroke.length} points`);
+            log(`AFTER: Total strokes in memory: ${strokes.length}`);
+            
+            // Clear overlay and commit stroke to main canvas
+            overlayCanvas.getContext('2d').clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            redrawAll();
+            
+            // Save to localStorage
+            localStorage.setItem('test-strokes', JSON.stringify(strokes));
+            log(`Saved ${strokes.length} strokes to localStorage`);
+        }
+        
+        function redrawAll() {
+            const ctx = mainCanvas.getContext('2d');
+            ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+            
+            log(`Redrawing ${strokes.length} strokes on main canvas`);
+            
+            strokes.forEach((stroke, index) => {
+                if (stroke.points.length >= 2) {
+                    ctx.strokeStyle = stroke.tool === 'highlight' ? 'yellow' : 'black';
+                    ctx.lineWidth = stroke.tool === 'highlight' ? 10 : 2;
+                    ctx.globalAlpha = stroke.tool === 'highlight' ? 0.3 : 1.0;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+                    
+                    if (stroke.inputType === 'touch') {
+                        // Smooth curves for touch
+                        for (let i = 1; i < stroke.points.length - 1; i++) {
+                            const midX = (stroke.points[i].x + stroke.points[i + 1].x) / 2;
+                            const midY = (stroke.points[i].y + stroke.points[i + 1].y) / 2;
+                            ctx.quadraticCurveTo(stroke.points[i].x, stroke.points[i].y, midX, midY);
+                        }
+                        if (stroke.points.length > 1) {
+                            ctx.lineTo(stroke.points[stroke.points.length - 1].x, stroke.points[stroke.points.length - 1].y);
+                        }
+                    } else {
+                        // Precise lines for mouse
+                        for (let i = 1; i < stroke.points.length; i++) {
+                            ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+                        }
+                    }
+                    
+                    ctx.stroke();
+                }
+            });
+        }
+        
+        function clearCanvas() {
+            strokes = [];
+            mainCanvas.getContext('2d').clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+            overlayCanvas.getContext('2d').clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            localStorage.removeItem('test-strokes');
+            log('Cleared all strokes');
+        }
+        
+        function loadFromStorage() {
+            const saved = localStorage.getItem('test-strokes');
+            if (saved) {
+                strokes = JSON.parse(saved);
+                log(`Loaded ${strokes.length} strokes from localStorage`);
+                redrawAll();
+            } else {
+                log('No saved strokes found');
+            }
+        }
+        
+        // Event listeners
+        overlayCanvas.addEventListener('mousedown', startDrawing);
+        overlayCanvas.addEventListener('mousemove', draw);
+        overlayCanvas.addEventListener('mouseup', endDrawing);
+        overlayCanvas.addEventListener('touchstart', startDrawing);
+        overlayCanvas.addEventListener('touchmove', draw);
+        overlayCanvas.addEventListener('touchend', endDrawing);
+        
+        // Initialize
+        window.addEventListener('resize', resizeCanvases);
+        resizeCanvases();
+        loadFromStorage();
+        log('Test initialized - try drawing multiple strokes to test persistence');
+    </script>
+</body>
+</html> 

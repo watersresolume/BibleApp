@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bible App - Minimalist Test</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .test-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <strong>Minimalist Bible App Test</strong><br>
+        ✓ Dark theme<br>
+        ✓ Icon-based tools<br>
+        ✓ Abbreviated translations<br>
+        ✓ Compact toolbar<br>
+        ✓ Fixed dropdowns
+    </div>
+    
+    <div id="app">
+        <!-- Upper Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <div class="dropdown">
+                    <button class="dropdown-btn" id="translationBtn">
+                        <span id="currentTranslation">KJV</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-content" id="translationDropdown">
+                        <div class="dropdown-item" data-translation="KJV">KJV - King James</div>
+                        <div class="dropdown-item" data-translation="NIV">NIV - New International</div>
+                        <div class="dropdown-item" data-translation="ESV">ESV - English Standard</div>
+                        <div class="dropdown-item" data-translation="NKJV">NKJV - New King James</div>
+                    </div>
+                </div>
+                
+                <div class="dropdown">
+                    <button class="dropdown-btn" id="chapterBtn">
+                        <span id="currentChapter">Gen 1</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-content" id="chapterDropdown">
+                        <div class="search-box">
+                            <input type="text" id="chapterSearch" placeholder="Search...">
+                        </div>
+                        <div class="chapter-list" id="chapterList">
+                            <!-- Chapters will be populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="toolbar-right">
+                <div class="dropdown">
+                    <button class="dropdown-btn tool-btn" id="toolBtn">
+                        <i class="fas fa-mouse-pointer" id="toolIcon"></i>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-content" id="toolDropdown">
+                        <div class="dropdown-item" data-tool="select">
+                            <i class="fas fa-mouse-pointer"></i> Select
+                        </div>
+                        <div class="dropdown-item" data-tool="highlight">
+                            <i class="fas fa-highlighter"></i> Highlight
+                        </div>
+                        <div class="dropdown-item" data-tool="underline">
+                            <i class="fas fa-underline"></i> Underline
+                        </div>
+                        <div class="dropdown-item" data-tool="circle">
+                            <i class="fas fa-circle"></i> Circle
+                        </div>
+                        <div class="dropdown-item" data-tool="erase">
+                            <i class="fas fa-eraser"></i> Erase
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dropdown">
+                    <button class="dropdown-btn" id="colorBtn">
+                        <div class="color-preview" id="currentColor"></div>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-content" id="colorDropdown">
+                        <div class="color-item" data-color="#FFD700" style="background-color: #FFD700;"></div>
+                        <div class="color-item" data-color="#FF6B6B" style="background-color: #FF6B6B;"></div>
+                        <div class="color-item" data-color="#4ECDC4" style="background-color: #4ECDC4;"></div>
+                        <div class="color-item" data-color="#45B7D1" style="background-color: #45B7D1;"></div>
+                        <div class="color-item" data-color="#96CEB4" style="background-color: #96CEB4;"></div>
+                    </div>
+                </div>
+                
+                <div class="dropdown">
+                    <button class="dropdown-btn" id="opacityBtn">
+                        <span id="currentOpacity">100%</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-content" id="opacityDropdown">
+                        <div class="opacity-item" data-opacity="25">25%</div>
+                        <div class="opacity-item" data-opacity="50">50%</div>
+                        <div class="opacity-item" data-opacity="75">75%</div>
+                        <div class="opacity-item" data-opacity="100">100%</div>
+                    </div>
+                </div>
+                
+                <button class="toolbar-btn" id="resetBtn">
+                    <i class="fas fa-undo"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Reading Area -->
+        <div class="reading-area" id="readingArea">
+            <div class="bible-text" id="bibleText">
+                <!-- Bible text will be loaded here -->
+            </div>
+            <canvas id="annotationCanvas" class="annotation-canvas"></canvas>
+        </div>
+    </div>
+    
+    <script src="bible-data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html> 

@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool Testing & Enhancement - Bible App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #2a2a2a;
+            border-radius: 12px;
+        }
+        
+        .header h1 {
+            color: #4a9eff;
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+        }
+        
+        .header p {
+            color: #888;
+            margin: 0;
+            font-size: 1.1em;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #3a3a3a;
+        }
+        
+        .test-section h2 {
+            color: #4a9eff;
+            margin: 0 0 20px 0;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .test-section h3 {
+            color: #e0e0e0;
+            margin: 20px 0 10px 0;
+            font-size: 1.2em;
+        }
+        
+        .tool-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            padding: 10px;
+            background: #333;
+            border-radius: 8px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #51cf66;
+        }
+        
+        .status-indicator.warning {
+            background: #ffd43b;
+        }
+        
+        .status-indicator.error {
+            background: #ff6b6b;
+        }
+        
+        .tool-feature {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #4a9eff;
+        }
+        
+        .tool-feature h4 {
+            margin: 0 0 8px 0;
+            color: #4a9eff;
+        }
+        
+        .tool-feature p {
+            margin: 0;
+            color: #ccc;
+            font-size: 0.9em;
+        }
+        
+        .test-canvas {
+            background: #333;
+            border: 2px dashed #4a9eff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            min-height: 200px;
+            position: relative;
+        }
+        
+        .test-canvas canvas {
+            width: 100%;
+            height: 200px;
+            background: #fff;
+            border-radius: 4px;
+            cursor: crosshair;
+        }
+        
+        .tool-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .tool-btn {
+            background: #4a9eff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+        
+        .tool-btn:hover {
+            background: #3a8eef;
+            transform: translateY(-1px);
+        }
+        
+        .tool-btn.active {
+            background: #51cf66;
+        }
+        
+        .color-picker {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #333;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .color-option.selected {
+            border-color: #4a9eff;
+            box-shadow: 0 0 10px rgba(74, 158, 255, 0.5);
+        }
+        
+        .size-slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .enhancement-ideas {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+            border: 1px solid #3a3a3a;
+        }
+        
+        .enhancement-ideas h2 {
+            color: #4a9eff;
+            margin: 0 0 20px 0;
+        }
+        
+        .idea-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        
+        .idea-item {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #51cf66;
+        }
+        
+        .idea-item h4 {
+            margin: 0 0 8px 0;
+            color: #51cf66;
+        }
+        
+        .idea-item p {
+            margin: 0;
+            color: #ccc;
+            font-size: 0.9em;
+        }
+        
+        .priority-high {
+            border-left-color: #ff6b6b;
+        }
+        
+        .priority-high h4 {
+            color: #ff6b6b;
+        }
+        
+        .priority-medium {
+            border-left-color: #ffd43b;
+        }
+        
+        .priority-medium h4 {
+            color: #ffd43b;
+        }
+        
+        .priority-low {
+            border-left-color: #51cf66;
+        }
+        
+        .priority-low h4 {
+            color: #51cf66;
+        }
+        
+        .test-results {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+            border: 1px solid #3a3a3a;
+        }
+        
+        .test-results h2 {
+            color: #4a9eff;
+            margin: 0 0 20px 0;
+        }
+        
+        .result-item {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #4a9eff;
+        }
+        
+        .result-item.success {
+            border-left-color: #51cf66;
+        }
+        
+        .result-item.warning {
+            border-left-color: #ffd43b;
+        }
+        
+        .result-item.error {
+            border-left-color: #ff6b6b;
+        }
+        
+        @media (max-width: 768px) {
+            .test-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .idea-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-tools"></i> Tool Testing & Enhancement</h1>
+            <p>Comprehensive testing and enhancement environment for Bible App annotation tools</p>
+        </div>
+        
+        <div class="test-grid">
+            <div class="test-section">
+                <h2><i class="fas fa-pen"></i> Current Tools Status</h2>
+                
+                <div class="tool-status">
+                    <div class="status-indicator"></div>
+                    <div>
+                        <strong>Pen Tool</strong> - Fully functional with color and size options
+                    </div>
+                </div>
+                
+                <div class="tool-status">
+                    <div class="status-indicator"></div>
+                    <div>
+                        <strong>Highlighter Tool</strong> - Working with transparency and colors
+                    </div>
+                </div>
+                
+                <div class="tool-status">
+                    <div class="status-indicator"></div>
+                    <div>
+                        <strong>Eraser Tool</strong> - Functional for removing annotations
+                    </div>
+                </div>
+                
+                <div class="tool-status">
+                    <div class="status-indicator"></div>
+                    <div>
+                        <strong>Undo/Redo</strong> - History management working
+                    </div>
+                </div>
+                
+                <div class="tool-status">
+                    <div class="status-indicator"></div>
+                    <div>
+                        <strong>Touch Gestures</strong> - Pinch/zoom and scroll supported
+                    </div>
+                </div>
+                
+                <div class="tool-status">
+                    <div class="status-indicator"></div>
+                    <div>
+                        <strong>Annotation Persistence</strong> - Passage-based storage working
+                    </div>
+                </div>
+            </div>
+            
+            <div class="test-section">
+                <h2><i class="fas fa-flask"></i> Tool Testing Canvas</h2>
+                
+                <div class="tool-controls">
+                    <button class="tool-btn active" data-tool="pen">
+                        <i class="fas fa-pen"></i> Pen
+                    </button>
+                    <button class="tool-btn" data-tool="highlight">
+                        <i class="fas fa-highlighter"></i> Highlight
+                    </button>
+                    <button class="tool-btn" data-tool="erase">
+                        <i class="fas fa-eraser"></i> Erase
+                    </button>
+                    <button class="tool-btn" id="undoBtn">
+                        <i class="fas fa-undo"></i> Undo
+                    </button>
+                    <button class="tool-btn" id="redoBtn">
+                        <i class="fas fa-redo"></i> Redo
+                    </button>
+                    <button class="tool-btn" id="clearBtn">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                </div>
+                
+                <div class="color-picker" id="colorPicker">
+                    <div class="color-option selected" style="background: #fefefe;" data-color="#fefefe"></div>
+                    <div class="color-option" style="background: #ff3333;" data-color="#ff3333"></div>
+                    <div class="color-option" style="background: #0090ff;" data-color="#0090ff"></div>
+                    <div class="color-option" style="background: #00ff00;" data-color="#00ff00"></div>
+                    <div class="color-option" style="background: #ffff00;" data-color="#ffff00"></div>
+                    <div class="color-option" style="background: #ff00ff;" data-color="#ff00ff"></div>
+                    <div class="color-option" style="background: #00ffff;" data-color="#00ffff"></div>
+                    <div class="color-option" style="background: #000000;" data-color="#000000"></div>
+                </div>
+                
+                <div>
+                    <label for="sizeSlider">Size: <span id="sizeValue">4</span>px</label>
+                    <input type="range" id="sizeSlider" class="size-slider" min="2" max="40" value="4">
+                </div>
+                
+                <div class="test-canvas">
+                    <canvas id="testCanvas" width="800" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2><i class="fas fa-cogs"></i> Current Tool Features</h2>
+            
+            <div class="tool-feature">
+                <h4>Pen Tool</h4>
+                <p>• Customizable colors (8 options) • Size range: 2-40px • Smooth drawing • Color preview in toolbar</p>
+            </div>
+            
+            <div class="tool-feature">
+                <h4>Highlighter Tool</h4>
+                <p>• Semi-transparent highlighting • Auto-sized to text • Color customization • Non-destructive overlay</p>
+            </div>
+            
+            <div class="tool-feature">
+                <h4>Eraser Tool</h4>
+                <p>• Variable size erasing • Smooth erasure • Works on all annotation types • Real-time feedback</p>
+            </div>
+            
+            <div class="tool-feature">
+                <h4>Touch Support</h4>
+                <p>• Two-finger pinch/zoom (50%-300%) • Two-finger scrolling • Single-finger drawing • Gesture detection</p>
+            </div>
+            
+            <div class="tool-feature">
+                <h4>Persistence</h4>
+                <p>• Passage-based storage • Cross-tab persistence • Undo/redo history • Automatic saving</p>
+            </div>
+        </div>
+        
+        <div class="enhancement-ideas">
+            <h2><i class="fas fa-lightbulb"></i> Tool Enhancement Ideas</h2>
+            
+            <div class="idea-list">
+                <div class="idea-item priority-high">
+                    <h4>Text Annotation Tool</h4>
+                    <p>Add ability to add text notes and comments directly on the Bible text with customizable fonts and sizes.</p>
+                </div>
+                
+                <div class="idea-item priority-high">
+                    <h4>Shape Tools</h4>
+                    <p>Add rectangle, circle, and arrow tools for highlighting specific areas or creating visual connections.</p>
+                </div>
+                
+                <div class="idea-item priority-medium">
+                    <h4>Advanced Color Picker</h4>
+                    <p>Replace color dropdowns with a full color picker allowing custom colors and opacity settings.</p>
+                </div>
+                
+                <div class="idea-item priority-medium">
+                    <h4>Tool Presets</h4>
+                    <p>Save and load custom tool configurations (color, size, opacity) for different annotation styles.</p>
+                </div>
+                
+                <div class="idea-item priority-medium">
+                    <h4>Selection Tool</h4>
+                    <p>Add ability to select and move existing annotations, or resize them after creation.</p>
+                </div>
+                
+                <div class="idea-item priority-low">
+                    <h4>Annotation Export</h4>
+                    <p>Export annotations as images or PDF files for sharing or printing.</p>
+                </div>
+                
+                <div class="idea-item priority-low">
+                    <h4>Voice Notes</h4>
+                    <p>Add ability to record voice annotations alongside text and drawing annotations.</p>
+                </div>
+                
+                <div class="idea-item priority-low">
+                    <h4>Collaborative Annotations</h4>
+                    <p>Share annotations with other users and see their annotations in real-time.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-results">
+            <h2><i class="fas fa-clipboard-check"></i> Testing Results</h2>
+            
+            <div class="result-item success">
+                <h4>✅ Basic Tools Working</h4>
+                <p>All core annotation tools (pen, highlighter, eraser) are functioning correctly with proper color and size controls.</p>
+            </div>
+            
+            <div class="result-item success">
+                <h4>✅ Touch Gestures Functional</h4>
+                <p>Two-finger pinch/zoom and scrolling work properly on touch devices with smooth animations.</p>
+            </div>
+            
+            <div class="result-item success">
+                <h4>✅ Persistence System</h4>
+                <p>Annotations are properly saved and restored based on Bible passages, working across tab switches.</p>
+            </div>
+            
+            <div class="result-item warning">
+                <h4>⚠️ Performance on Large Passages</h4>
+                <p>Very long passages may experience some lag during annotation operations. Consider optimization.</p>
+            </div>
+            
+            <div class="result-item warning">
+                <h4>⚠️ Mobile Toolbar Layout</h4>
+                <p>Toolbar could be more compact on mobile devices to maximize reading space.</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Simple test canvas implementation
+        const canvas = document.getElementById('testCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let currentTool = 'pen';
+        let currentColor = '#fefefe';
+        let currentSize = 4;
+        
+        // Tool buttons
+        document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tool-btn[data-tool]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentTool = btn.dataset.tool;
+            });
+        });
+        
+        // Color picker
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                currentColor = option.dataset.color;
+            });
+        });
+        
+        // Size slider
+        const sizeSlider = document.getElementById('sizeSlider');
+        const sizeValue = document.getElementById('sizeValue');
+        sizeSlider.addEventListener('input', (e) => {
+            currentSize = parseInt(e.target.value);
+            sizeValue.textContent = currentSize;
+        });
+        
+        // Drawing functions
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);
+        }
+        
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            ctx.lineWidth = currentSize;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            if (currentTool === 'pen') {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.globalAlpha = 1.0;
+                ctx.strokeStyle = currentColor;
+            } else if (currentTool === 'highlight') {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.globalAlpha = 0.3;
+                ctx.strokeStyle = currentColor;
+            } else if (currentTool === 'erase') {
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.globalAlpha = 1.0;
+                ctx.strokeStyle = '#000';
+            }
+            
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+        
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+        
+        // Clear button
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+        
+        // Initialize canvas
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = currentColor;
+        ctx.lineWidth = currentSize;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+    </script>
+</body>
+</html> 

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NLT Data Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .section {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .file-input {
+            margin: 10px 0;
+        }
+        .preview {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .stats {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔄 NLT Data Converter</h1>
+    
+    <div class="container">
+        <div class="section">
+            <h2>📁 Step 1: Upload Your NLT File</h2>
+            <p>Select your downloaded <code>bible_nlt.json</code> file:</p>
+            
+            <input type="file" id="nltFile" accept=".json" class="file-input">
+            <button class="button" onclick="analyzeFile()">Analyze File</button>
+            
+            <div id="fileInfo"></div>
+        </div>
+        
+        <div class="section">
+            <h2>🔍 Step 2: File Analysis</h2>
+            <div id="analysis">
+                <p>Upload your file to see the analysis...</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>📝 Step 3: Convert to App Format</h2>
+        <div id="conversion">
+            <p>After analyzing your file, you'll see conversion options here.</p>
+        </div>
+        <button class="button" onclick="convertToAppFormat()" id="convertBtn" style="display: none;">Convert to App Format</button>
+    </div>
+    
+    <div class="section">
+        <h2>📋 Step 4: Download Converted File</h2>
+        <div id="download">
+            <p>After conversion, you'll be able to download the converted file here.</p>
+        </div>
+    </div>
+
+    <script>
+        let nltData = null;
+        let convertedData = null;
+
+        function analyzeFile() {
+            const fileInput = document.getElementById('nltFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file first!');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    nltData = JSON.parse(e.target.result);
+                    displayAnalysis(nltData);
+                } catch (error) {
+                    document.getElementById('analysis').innerHTML = `
+                        <div class="warning">
+                            <strong>Error parsing JSON:</strong> ${error.message}
+                        </div>
+                    `;
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function displayAnalysis(data) {
+            const analysis = document.getElementById('analysis');
+            let html = '<h3>File Analysis Results:</h3>';
+            
+            // Analyze the structure
+            const dataType = analyzeDataType(data);
+            const stats = getDataStats(data);
+            
+            html += `
+                <div class="stats">
+                    <strong>Data Type:</strong> ${dataType}<br>
+                    <strong>Total Books:</strong> ${stats.totalBooks}<br>
+                    <strong>Total Chapters:</strong> ${stats.totalChapters}<br>
+                    <strong>Total Verses:</strong> ${stats.totalVerses}<br>
+                    <strong>File Size:</strong> ${stats.fileSize} KB<br>
+                </div>
+            `;
+            
+            html += '<h4>Sample Data Structure:</h4>';
+            html += '<div class="preview">' + JSON.stringify(data, null, 2).substring(0, 1000) + '...</div>';
+            
+            analysis.innerHTML = html;
+            
+            // Show convert button
+            document.getElementById('convertBtn').style.display = 'inline-block';
+        }
+
+        function analyzeDataType(data) {
+            if (Array.isArray(data)) {
+                return 'Array of verses';
+            } else if (typeof data === 'object') {
+                if (data.books || data.Books) {
+                    return 'Book-based structure';
+                } else if (data.verses || data.Verses) {
+                    return 'Verse-based structure';
+                } else {
+                    return 'Object structure';
+                }
+            }
+            return 'Unknown structure';
+        }
+
+        function getDataStats(data) {
+            let totalBooks = 0;
+            let totalChapters = 0;
+            let totalVerses = 0;
+            
+            if (Array.isArray(data)) {
+                totalVerses = data.length;
+                // Count unique books and chapters
+                const books = new Set();
+                const chapters = new Set();
+                data.forEach(verse => {
+                    if (verse.book) books.add(verse.book);
+                    if (verse.chapter) chapters.add(`${verse.book}-${verse.chapter}`);
+                });
+                totalBooks = books.size;
+                totalChapters = chapters.size;
+            } else if (typeof data === 'object') {
+                // Count books
+                totalBooks = Object.keys(data).length;
+                
+                // Count chapters and verses
+                Object.values(data).forEach(book => {
+                    if (typeof book === 'object') {
+                        totalChapters += Object.keys(book).length;
+                        Object.values(book).forEach(chapter => {
+                            if (typeof chapter === 'object') {
+                                totalVerses += Object.keys(chapter).length;
+                            }
+                        });
+                    }
+                });
+            }
+            
+            return {
+                totalBooks,
+                totalChapters,
+                totalVerses,
+                fileSize: Math.round(JSON.stringify(data).length / 1024)
+            };
+        }
+
+        function convertToAppFormat() {
+            if (!nltData) {
+                alert('Please analyze a file first!');
+                return;
+            }
+
+            try {
+                convertedData = convertData(nltData);
+                
+                document.getElementById('conversion').innerHTML = `
+                    <div class="success">
+                        <strong>✅ Conversion Complete!</strong><br>
+                        Data has been converted to the app format.
+                    </div>
+                    <h4>Converted Structure Sample:</h4>
+                    <div class="preview">${JSON.stringify(convertedData, null, 2).substring(0, 1000)}...</div>
+                `;
+                
+                document.getElementById('download').innerHTML = `
+                    <div class="success">
+                        <strong>Ready to Download!</strong><br>
+                        <button class="button" onclick="downloadConvertedFile()">Download nlt-data.js</button>
+                        <button class="button" onclick="copyToClipboard()">Copy to Clipboard</button>
+                    </div>
+                `;
+                
+            } catch (error) {
+                document.getElementById('conversion').innerHTML = `
+                    <div class="warning">
+                        <strong>Conversion Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function convertData(data) {
+            // Convert various formats to app format
+            if (Array.isArray(data)) {
+                return convertArrayFormat(data);
+            } else if (typeof data === 'object') {
+                return convertObjectFormat(data);
+            }
+            throw new Error('Unsupported data format');
+        }
+
+        function convertArrayFormat(data) {
+            const converted = {};
+            
+            data.forEach(verse => {
+                const book = verse.book || verse.Book || verse.book_name;
+                const chapter = verse.chapter || verse.Chapter || verse.chapter_number;
+                const verseNum = verse.verse || verse.Verse || verse.verse_number;
+                const text = verse.text || verse.Text || verse.verse_text;
+                
+                if (book && chapter && verseNum && text) {
+                    if (!converted[book]) converted[book] = {};
+                    if (!converted[book][chapter]) converted[book][chapter] = {};
+                    converted[book][chapter][verseNum] = text;
+                }
+            });
+            
+            return converted;
+        }
+
+        function convertObjectFormat(data) {
+            // Handle various object formats
+            if (data.books || data.Books) {
+                return convertBooksFormat(data);
+            } else {
+                // Assume it's already in the right format or close to it
+                return data;
+            }
+        }
+
+        function convertBooksFormat(data) {
+            const books = data.books || data.Books;
+            const converted = {};
+            
+            books.forEach(book => {
+                const bookName = book.name || book.book_name;
+                converted[bookName] = {};
+                
+                book.chapters.forEach(chapter => {
+                    const chapterNum = chapter.chapter || chapter.chapter_number;
+                    converted[bookName][chapterNum] = {};
+                    
+                    chapter.verses.forEach(verse => {
+                        const verseNum = verse.verse || verse.verse_number;
+                        const text = verse.text || verse.verse_text;
+                        converted[bookName][chapterNum][verseNum] = text;
+                    });
+                });
+            });
+            
+            return converted;
+        }
+
+        function downloadConvertedFile() {
+            if (!convertedData) {
+                alert('Please convert data first!');
+                return;
+            }
+
+            const fileContent = `// nlt-data.js - Complete NLT Bible Data
+// Generated from bible_nlt.json
+
+export const nltData = ${JSON.stringify(convertedData, null, 2)};
+
+// Helper function to get NLT text for any passage
+export function getNLTText(book, chapter, verse, verseEnd = null) {
+    if (!nltData[book] || !nltData[book][chapter]) {
+        return null;
+    }
+    
+    if (verseEnd && verseEnd !== verse) {
+        // Return range of verses
+        let text = '';
+        for (let v = verse; v <= verseEnd; v++) {
+            if (nltData[book][chapter][v]) {
+                text += \`\${v} \${nltData[book][chapter][v]}\\n\`;
+            }
+        }
+        return text.trim();
+    } else {
+        // Return single verse
+        return nltData[book][chapter][verse] ? \`\${verse} \${nltData[book][chapter][verse]}\` : null;
+    }
+}`;
+
+            const blob = new Blob([fileContent], { type: 'text/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'nlt-data.js';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function copyToClipboard() {
+            if (!convertedData) {
+                alert('Please convert data first!');
+                return;
+            }
+
+            const fileContent = `// nlt-data.js - Complete NLT Bible Data
+// Generated from bible_nlt.json
+
+export const nltData = ${JSON.stringify(convertedData, null, 2)};
+
+// Helper function to get NLT text for any passage
+export function getNLTText(book, chapter, verse, verseEnd = null) {
+    if (!nltData[book] || !nltData[book][chapter]) {
+        return null;
+    }
+    
+    if (verseEnd && verseEnd !== verse) {
+        // Return range of verses
+        let text = '';
+        for (let v = verse; v <= verseEnd; v++) {
+            if (nltData[book][chapter][v]) {
+                text += \`\${v} \${nltData[book][chapter][v]}\\n\`;
+            }
+        }
+        return text.trim();
+    } else {
+        // Return single verse
+        return nltData[book][chapter][verse] ? \`\${verse} \${nltData[book][chapter][verse]}\` : null;
+    }
+}`;
+
+            navigator.clipboard.writeText(fileContent).then(function() {
+                alert('Converted data copied to clipboard! You can now paste it into nlt-data.js');
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+                alert('Copy failed. Please use the download button instead.');
+            });
+        }
+    </script>
+</body>
+</html> 

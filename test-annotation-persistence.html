@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annotation Persistence Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .test-section {
+            background: #333;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #45a049;
+        }
+        .test-button.danger {
+            background: #f44336;
+        }
+        .test-button.danger:hover {
+            background: #da190b;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.success {
+            background: #4CAF50;
+            color: white;
+        }
+        .status.error {
+            background: #f44336;
+            color: white;
+        }
+        .status.info {
+            background: #2196F3;
+            color: white;
+        }
+        .test-area {
+            background: #444;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+            position: relative;
+            min-height: 200px;
+        }
+        .annotation-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: auto;
+            z-index: 2;
+        }
+        .tool-bar {
+            background: #555;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .tool-button {
+            background: #666;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 2px;
+        }
+        .tool-button.active {
+            background: #4CAF50;
+        }
+        .log-area {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Annotation Persistence Test</h1>
+        
+        <div class="test-section">
+            <h2>Test Instructions</h2>
+            <p>This test verifies that annotations are properly saved and loaded across tabs and sessions.</p>
+            <ol>
+                <li>Draw some annotations using the tools below</li>
+                <li>Switch between tabs to verify annotations persist</li>
+                <li>Reload the page to verify annotations are restored</li>
+                <li>Check the console logs for detailed information</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h2>Test Controls</h2>
+            <button class="test-button" onclick="openBibleApp()">Open Bible App</button>
+            <button class="test-button" onclick="testStorage()">Test localStorage</button>
+            <button class="test-button" onclick="clearTestData()">Clear Test Data</button>
+            <button class="test-button" onclick="checkAnnotations()">Check Annotations</button>
+            <button class="test-button danger" onclick="clearAllAnnotations()">Clear All Annotations</button>
+        </div>
+
+        <div class="test-section">
+            <h2>Drawing Test Area</h2>
+            <div class="tool-bar">
+                <button class="tool-button active" onclick="setTool('pen')">Pen</button>
+                <button class="tool-button" onclick="setTool('highlight')">Highlighter</button>
+                <button class="tool-button" onclick="setTool('erase')">Eraser</button>
+            </div>
+            <div class="test-area" id="testArea">
+                <canvas id="testCanvas" class="annotation-canvas" width="800" height="400"></canvas>
+                <div style="position: relative; z-index: 1; padding: 20px;">
+                    <h3>Draw here to test annotation persistence</h3>
+                    <p>This area simulates the Bible app's annotation system. Draw with different tools and test if annotations persist across tabs and page reloads.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Status</h2>
+            <div id="status"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Debug Log</h2>
+            <div class="log-area" id="logArea"></div>
+        </div>
+    </div>
+    
+    <script>
+        let currentTool = 'pen';
+        let drawing = false;
+        let lastPoint = null;
+        let strokeHistory = {};
+        let currentStrokePoints = [];
+        
+        const canvas = document.getElementById('testCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Initialize canvas
+        function initCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        }
+        
+        // Set drawing tool
+        function setTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tool-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            log(`Tool changed to: ${tool}`);
+        }
+        
+        // Get drawing settings
+        function getDrawingSettings() {
+            switch(currentTool) {
+                case 'pen':
+                    return { color: '#ffff00', size: 3, alpha: 1.0, composite: 'source-over' };
+                case 'highlight':
+                    return { color: 'rgba(255,255,0,0.30)', size: 15, alpha: 0.3, composite: 'source-over' };
+                case 'erase':
+                    return { color: '#000000', size: 10, alpha: 1.0, composite: 'destination-out' };
+                default:
+                    return { color: '#ffff00', size: 3, alpha: 1.0, composite: 'source-over' };
+            }
+        }
+        
+        // Get pointer position
+        function getPointerPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+        
+        // Start drawing
+        function startDrawing(e) {
+            drawing = true;
+            lastPoint = getPointerPos(e);
+            currentStrokePoints = [lastPoint];
+            log(`Started drawing with ${currentTool}`);
+        }
+        
+        // Draw
+        function draw(e) {
+            if (!drawing) return;
+            
+            const point = getPointerPos(e);
+            currentStrokePoints.push(point);
+            
+            const settings = getDrawingSettings();
+            
+            ctx.save();
+            ctx.globalAlpha = settings.alpha;
+            ctx.globalCompositeOperation = settings.composite;
+            ctx.strokeStyle = settings.color;
+            ctx.lineWidth = settings.size;
+            
+            ctx.beginPath();
+            ctx.moveTo(lastPoint.x, lastPoint.y);
+            ctx.lineTo(point.x, point.y);
+            ctx.stroke();
+            ctx.restore();
+            
+            lastPoint = point;
+        }
+        
+        // End drawing
+        function endDrawing() {
+            if (!drawing) return;
+            
+            // Save stroke to history
+            if (currentStrokePoints.length > 1) {
+                const settings = getDrawingSettings();
+                const strokeData = {
+                    type: currentTool,
+                    color: settings.color,
+                    size: settings.size,
+                    points: [...currentStrokePoints],
+                    timestamp: Date.now()
+                };
+                
+                if (!strokeHistory['test-passage']) {
+                    strokeHistory['test-passage'] = [];
+                }
+                strokeHistory['test-passage'].push(strokeData);
+                
+                // Save to localStorage
+                saveAnnotations();
+                
+                log(`Stroke saved: ${currentTool}, points: ${currentStrokePoints.length}`);
+            }
+            
+            drawing = false;
+            lastPoint = null;
+            currentStrokePoints = [];
+        }
+        
+        // Save annotations
+        function saveAnnotations() {
+            try {
+                const data = JSON.stringify(strokeHistory);
+                localStorage.setItem('test-annotations', data);
+                log('Annotations saved to localStorage');
+            } catch (e) {
+                log('Error saving annotations: ' + e.message, 'error');
+            }
+        }
+        
+        // Load annotations
+        function loadAnnotations() {
+            try {
+                const data = localStorage.getItem('test-annotations');
+                if (data) {
+                    strokeHistory = JSON.parse(data);
+                    redrawAllStrokes();
+                    log('Annotations loaded from localStorage');
+                } else {
+                    strokeHistory = {};
+                    log('No saved annotations found');
+                }
+            } catch (e) {
+                log('Error loading annotations: ' + e.message, 'error');
+                strokeHistory = {};
+            }
+        }
+        
+        // Redraw all strokes
+        function redrawAllStrokes() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (strokeHistory['test-passage']) {
+                for (const stroke of strokeHistory['test-passage']) {
+                    if (stroke.points && stroke.points.length > 1) {
+                        ctx.save();
+                        ctx.globalAlpha = stroke.type === 'highlight' ? 0.3 : 1.0;
+                        ctx.globalCompositeOperation = stroke.type === 'erase' ? 'destination-out' : 'source-over';
+                        ctx.strokeStyle = stroke.color;
+                        ctx.lineWidth = stroke.size;
+                        ctx.lineCap = 'round';
+                        ctx.lineJoin = 'round';
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+                        for (let i = 1; i < stroke.points.length; i++) {
+                            ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+                        }
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                }
+            }
+        }
+        
+        // Event listeners
+        canvas.addEventListener('pointerdown', startDrawing);
+        canvas.addEventListener('pointermove', draw);
+        canvas.addEventListener('pointerup', endDrawing);
+        canvas.addEventListener('pointerleave', endDrawing);
+        
+        // Utility functions
+        function log(message, type = 'info') {
+            const logArea = document.getElementById('logArea');
+            const timestamp = new Date().toLocaleTimeString();
+            logArea.textContent += `[${timestamp}] ${message}\n`;
+            logArea.scrollTop = logArea.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+        
+        function showStatus(message, type = 'success') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        function openBibleApp() {
+            window.open('index.html', '_blank');
+        }
+        
+        function testStorage() {
+            try {
+                const testKey = 'test-annotation-persistence';
+                const testData = { test: 'data' };
+                localStorage.setItem(testKey, JSON.stringify(testData));
+                const retrieved = JSON.parse(localStorage.getItem(testKey));
+                localStorage.removeItem(testKey);
+                
+                if (retrieved.test === 'data') {
+                    showStatus('✅ localStorage is working correctly', 'success');
+                    log('localStorage test passed');
+                } else {
+                    showStatus('❌ localStorage test failed', 'error');
+                    log('localStorage test failed', 'error');
+                }
+            } catch (e) {
+                showStatus('❌ localStorage is not available: ' + e.message, 'error');
+                log('localStorage error: ' + e.message, 'error');
+            }
+        }
+        
+        function clearTestData() {
+            localStorage.removeItem('test-annotations');
+            strokeHistory = {};
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            showStatus('Test data cleared', 'info');
+            log('Test data cleared');
+        }
+        
+        function checkAnnotations() {
+            const data = localStorage.getItem('test-annotations');
+            if (data) {
+                try {
+                    const annotations = JSON.parse(data);
+                    const strokeCount = annotations['test-passage'] ? annotations['test-passage'].length : 0;
+                    showStatus(`Found ${strokeCount} saved strokes`, 'success');
+                    log(`Found ${strokeCount} saved strokes`);
+                } catch (e) {
+                    showStatus('Error parsing saved annotations', 'error');
+                    log('Error parsing saved annotations: ' + e.message, 'error');
+                }
+            } else {
+                showStatus('No saved annotations found', 'info');
+                log('No saved annotations found');
+            }
+        }
+        
+        function clearAllAnnotations() {
+            if (confirm('Are you sure you want to clear all annotations?')) {
+                // Clear test annotations
+                localStorage.removeItem('test-annotations');
+                strokeHistory = {};
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Clear Bible app annotations
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.endsWith('-strokes')) {
+                        keysToRemove.push(key);
+                    }
+                }
+                keysToRemove.forEach(key => localStorage.removeItem(key));
+                
+                showStatus('All annotations cleared', 'info');
+                log('All annotations cleared');
+            }
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            initCanvas();
+            loadAnnotations();
+            log('Test page loaded');
+            showStatus('Test page ready', 'success');
+        });
+        
+        window.addEventListener('resize', initCanvas);
+    </script>
+</body>
+</html> 

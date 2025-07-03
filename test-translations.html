@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bible App - Translation Test</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            color: #333;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .translation-test {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .translation-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f9f9f9;
+        }
+        .translation-name {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .translation-status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-reliable {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-limited {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .test-passage {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .test-result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            min-height: 60px;
+        }
+        .result-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .result-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .result-loading {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Bible App Translation System Test</h1>
+        
+        <div class="test-section">
+            <h2 class="test-title">Translation API Configuration</h2>
+            <p>This test verifies the improved translation system with better error handling and more translation options.</p>
+            
+            <div class="translation-test">
+                <div class="translation-card">
+                    <div class="translation-name">ESV (English Standard Version)</div>
+                    <div class="translation-status status-reliable">Reliable API</div>
+                    <div class="test-passage">Test Passage: John 3:16</div>
+                    <button class="test-button" onclick="testTranslation('ESV', 'John 3:16')">Test ESV</button>
+                    <div id="result-esv" class="test-result"></div>
+                </div>
+                
+                <div class="translation-card">
+                    <div class="translation-name">NIV (New International Version)</div>
+                    <div class="translation-status status-limited">Limited API</div>
+                    <div class="test-passage">Test Passage: John 3:16</div>
+                    <button class="test-button" onclick="testTranslation('NIV', 'John 3:16')">Test NIV</button>
+                    <div id="result-niv" class="test-result"></div>
+                </div>
+                
+                <div class="translation-card">
+                    <div class="translation-name">KJV (King James Version)</div>
+                    <div class="translation-status status-limited">Limited API</div>
+                    <div class="test-passage">Test Passage: John 3:16</div>
+                    <button class="test-button" onclick="testTranslation('KJV', 'John 3:16')">Test KJV</button>
+                    <div id="result-kjv" class="test-result"></div>
+                </div>
+                
+                <div class="translation-card">
+                    <div class="translation-name">NLT (New Living Translation)</div>
+                    <div class="translation-status status-limited">Limited API</div>
+                    <div class="test-passage">Test Passage: John 3:16</div>
+                    <button class="test-button" onclick="testTranslation('NLT', 'John 3:16')">Test NLT</button>
+                    <div id="result-nlt" class="test-result"></div>
+                </div>
+                
+                <div class="translation-card">
+                    <div class="translation-name">NKJV (New King James Version)</div>
+                    <div class="translation-status status-limited">Limited API</div>
+                    <div class="test-passage">Test Passage: John 3:16</div>
+                    <button class="test-button" onclick="testTranslation('NKJV', 'John 3:16')">Test NKJV</button>
+                    <div id="result-nkjv" class="test-result"></div>
+                </div>
+                
+                <div class="translation-card">
+                    <div class="translation-name">NASB (New American Standard Bible)</div>
+                    <div class="translation-status status-limited">Limited API</div>
+                    <div class="test-passage">Test Passage: John 3:16</div>
+                    <button class="test-button" onclick="testTranslation('NASB', 'John 3:16')">Test NASB</button>
+                    <div id="result-nasb" class="test-result"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2 class="test-title">Error Handling Test</h2>
+            <p>Test how the system handles translation failures and fallbacks.</p>
+            <button class="test-button" onclick="testErrorHandling()">Test Error Handling</button>
+            <div id="error-test-result" class="test-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2 class="test-title">Translation Comparison</h2>
+            <p>Compare the same passage across different translations.</p>
+            <select id="comparison-passage" style="padding: 8px; margin-right: 10px;">
+                <option value="John 3:16">John 3:16</option>
+                <option value="Psalm 23:1-6">Psalm 23:1-6</option>
+                <option value="Genesis 1:1-3">Genesis 1:1-3</option>
+                <option value="Matthew 28:19-20">Matthew 28:19-20</option>
+            </select>
+            <button class="test-button" onclick="compareTranslations()">Compare Translations</button>
+            <div id="comparison-result" class="test-result"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Translation API Configuration (copied from app.js)
+        const TRANSLATION_APIS = {
+            ESV: {
+                name: 'English Standard Version',
+                api: 'esv',
+                url: 'https://api.esv.org/v3/passage/text/',
+                apiKey: 'dc81f59914a2da3c0d0b4fbae973551d8fbdc133',
+                params: 'include-passage-references=false&include-verse-numbers=true&include-footnotes=false&include-headings=false&include-short-copyright=false',
+                reliable: true
+            },
+            NIV: {
+                name: 'New International Version',
+                api: 'bible-api',
+                url: 'https://bible-api.com/',
+                params: 'translation=niv',
+                reliable: false
+            },
+            KJV: {
+                name: 'King James Version',
+                api: 'bible-api',
+                url: 'https://bible-api.com/',
+                params: 'translation=kjv',
+                reliable: false
+            },
+            NKJV: {
+                name: 'New King James Version',
+                api: 'bible-api',
+                url: 'https://bible-api.com/',
+                params: 'translation=nkjv',
+                reliable: false
+            },
+            NLT: {
+                name: 'New Living Translation',
+                api: 'bible-api',
+                url: 'https://bible-api.com/',
+                params: 'translation=nlt',
+                reliable: false
+            },
+            NASB: {
+                name: 'New American Standard Bible',
+                api: 'bible-api',
+                url: 'https://bible-api.com/',
+                params: 'translation=nasb',
+                reliable: false
+            },
+            CSB: {
+                name: 'Christian Standard Bible',
+                api: 'bible-api',
+                url: 'https://bible-api.com/',
+                params: 'translation=csb',
+                reliable: false
+            }
+        };
+        
+        // Make it available globally for testing
+        window.TRANSLATION_APIS = TRANSLATION_APIS;
+        
+        // Test translation function
+        window.testTranslation = async function(translation, passage) {
+            const resultDiv = document.getElementById(`result-${translation.toLowerCase()}`);
+            resultDiv.className = 'test-result result-loading';
+            resultDiv.innerHTML = 'Testing translation...';
+            
+            try {
+                const api = TRANSLATION_APIS[translation];
+                if (!api) {
+                    throw new Error(`Translation ${translation} not supported`);
+                }
+                
+                let url, options = {};
+                
+                if (api.api === 'esv') {
+                    url = `${api.url}?q=${encodeURIComponent(passage)}&${api.params}`;
+                    options.headers = { 'Authorization': `Token ${api.apiKey}` };
+                } else if (api.api === 'bible-api') {
+                    url = `${api.url}${encodeURIComponent(passage)}?${api.params}`;
+                }
+                
+                const response = await fetch(url, options);
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                let text = '';
+                
+                if (api.api === 'esv') {
+                    text = data.passages && data.passages[0] ? data.passages[0] : '';
+                } else {
+                    text = formatVersesWithNumbers(data.verses);
+                }
+                
+                resultDiv.className = 'test-result result-success';
+                resultDiv.innerHTML = `<strong>Success!</strong><br>${text.substring(0, 200)}${text.length > 200 ? '...' : ''}`;
+                
+            } catch (error) {
+                resultDiv.className = 'test-result result-error';
+                resultDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+            }
+        };
+        
+        // Format verses function
+        function formatVersesWithNumbers(verses) {
+            if (!verses || !Array.isArray(verses)) {
+                return '';
+            }
+            
+            let formattedText = '';
+            verses.forEach(verse => {
+                if (verse.verse && verse.text) {
+                    formattedText += `${verse.verse} ${verse.text.trim()}\n`;
+                }
+            });
+            
+            return formattedText.trim();
+        }
+        
+        // Test error handling
+        window.testErrorHandling = async function() {
+            const resultDiv = document.getElementById('error-test-result');
+            resultDiv.className = 'test-result result-loading';
+            resultDiv.innerHTML = 'Testing error handling...';
+            
+            try {
+                // Test with an invalid translation
+                await testTranslation('INVALID', 'John 3:16');
+            } catch (error) {
+                resultDiv.className = 'test-result result-success';
+                resultDiv.innerHTML = `<strong>Error handling works!</strong><br>Successfully caught error: ${error.message}`;
+            }
+        };
+        
+        // Compare translations
+        window.compareTranslations = async function() {
+            const passage = document.getElementById('comparison-passage').value;
+            const resultDiv = document.getElementById('comparison-result');
+            resultDiv.className = 'test-result result-loading';
+            resultDiv.innerHTML = 'Comparing translations...';
+            
+            const translations = ['ESV', 'NIV', 'KJV'];
+            const results = {};
+            
+            for (const translation of translations) {
+                try {
+                    const api = TRANSLATION_APIS[translation];
+                    let url, options = {};
+                    
+                    if (api.api === 'esv') {
+                        url = `${api.url}?q=${encodeURIComponent(passage)}&${api.params}`;
+                        options.headers = { 'Authorization': `Token ${api.apiKey}` };
+                    } else if (api.api === 'bible-api') {
+                        url = `${api.url}${encodeURIComponent(passage)}?${api.params}`;
+                    }
+                    
+                    const response = await fetch(url, options);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        let text = '';
+                        
+                        if (api.api === 'esv') {
+                            text = data.passages && data.passages[0] ? data.passages[0] : '';
+                        } else {
+                            text = formatVersesWithNumbers(data.verses);
+                        }
+                        
+                        results[translation] = text.substring(0, 100) + '...';
+                    } else {
+                        results[translation] = `Error: ${response.status}`;
+                    }
+                } catch (error) {
+                    results[translation] = `Error: ${error.message}`;
+                }
+            }
+            
+            let comparisonHtml = '<strong>Translation Comparison:</strong><br><br>';
+            for (const [translation, text] of Object.entries(results)) {
+                comparisonHtml += `<strong>${translation}:</strong><br>${text}<br><br>`;
+            }
+            
+            resultDiv.className = 'test-result result-success';
+            resultDiv.innerHTML = comparisonHtml;
+        };
+    </script>
+</body>
+</html> 

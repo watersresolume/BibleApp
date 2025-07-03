@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Imports</title>
+</head>
+<body>
+    <h1>Debug Imports</h1>
+    <div id="output"></div>
+    
+    <script type="module">
+        console.log('[DEBUG] Starting import test');
+        
+        try {
+            console.log('[DEBUG] Attempting to import bibleStructure');
+            import('./bible-structure.js').then(module => {
+                console.log('[DEBUG] bibleStructure import successful:', module.bibleStructure);
+                console.log('[DEBUG] Number of books:', Object.keys(module.bibleStructure).length);
+                console.log('[DEBUG] First few books:', Object.keys(module.bibleStructure).slice(0, 5));
+                
+                document.getElementById('output').innerHTML = `
+                    <p>✅ bibleStructure import successful</p>
+                    <p>Number of books: ${Object.keys(module.bibleStructure).length}</p>
+                    <p>First few books: ${Object.keys(module.bibleStructure).slice(0, 5).join(', ')}</p>
+                `;
+            }).catch(error => {
+                console.error('[DEBUG] bibleStructure import failed:', error);
+                document.getElementById('output').innerHTML = `
+                    <p>❌ bibleStructure import failed: ${error.message}</p>
+                `;
+            });
+        } catch (error) {
+            console.error('[DEBUG] Import test failed:', error);
+            document.getElementById('output').innerHTML = `
+                <p>❌ Import test failed: ${error.message}</p>
+            `;
+        }
+    </script>
+</body>
+</html> 

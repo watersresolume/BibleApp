@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Undo/Redo Test - Bible App</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .test-info {
+            background: #2a2a2a;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px;
+            color: #e0e0e0;
+        }
+        .test-info h2 {
+            color: #4a9eff;
+            margin-bottom: 15px;
+        }
+        .test-info ul {
+            margin-left: 20px;
+        }
+        .test-info li {
+            margin-bottom: 8px;
+        }
+        .test-info .highlight {
+            background: #4a9eff;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h2>Enhanced Undo/Redo System Test</h2>
+        <p>This test demonstrates the comprehensive undo/redo functionality that tracks ALL user actions:</p>
+        <ul>
+            <li><span class="highlight">Drawing Actions</span> - Pen, highlighter, and eraser strokes</li>
+            <li><span class="highlight">Clear Actions</span> - Both tab-specific and app-wide clearing</li>
+            <li><span class="highlight">Tool Changes</span> - Switching between pen, highlighter, and eraser</li>
+            <li><span class="highlight">Color Changes</span> - Changing pen and highlighter colors</li>
+            <li><span class="highlight">Size Changes</span> - Adjusting pen size</li>
+        </ul>
+        <p><strong>Keyboard Shortcuts:</strong></p>
+        <ul>
+            <li><span class="highlight">Ctrl+Z</span> - Undo last action</li>
+            <li><span class="highlight">Ctrl+Y</span> - Redo last undone action</li>
+            <li><span class="highlight">Ctrl+Shift+Z</span> - Alternative redo shortcut</li>
+        </ul>
+        <p><strong>Test Instructions:</strong></p>
+        <ol>
+            <li>Load a Bible passage</li>
+            <li>Try drawing with different tools and colors</li>
+            <li>Change tools, colors, and pen size</li>
+            <li>Use the undo/redo buttons or keyboard shortcuts</li>
+            <li>Test clearing annotations (tap vs hold for different scopes)</li>
+            <li>Verify that ALL actions can be undone and redone</li>
+        </ol>
+    </div>
+
+    <div id="app">
+        <!-- Upper Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <div class="browser-tabs">
+                    <div class="tab-bar">
+                        <!-- Tabs will be created dynamically by JavaScript -->
+                    </div>
+                    <button class="new-tab-btn" id="newTabBtn">+</button>
+                </div>
+            </div>
+            
+            <div class="toolbar-right">
+                <div class="tool-slider" id="toolSlider">
+                    <div class="tool-wrapper">
+                        <button class="tool-icon selected" data-tool="pen" id="penToolBtn"><i class="fas fa-pen"></i></button>
+                        <div class="pen-color-dropdown" id="penColorDropdown">
+                            <button class="pen-color-option" style="--pen-color: #fefefe;" data-color="#fefefe" title="White">&nbsp;</button>
+                            <button class="pen-color-option" style="--pen-color: #ff3333;" data-color="#ff3333" title="Red">&nbsp;</button>
+                            <button class="pen-color-option" style="--pen-color: #0090ff;" data-color="#0090ff" title="Blue">&nbsp;</button>
+                            <button class="pen-color-option" style="--pen-color: #00ff00;" data-color="#00ff00" title="Green">&nbsp;</button>
+                            <button class="pen-color-option" style="--pen-color: #ffff00;" data-color="#ffff00" title="Yellow">&nbsp;</button>
+                        </div>
+                        <div class="size-slider-popup" id="penSizeSliderPopup">
+                            <input type="range" min="2" max="40" step="1" value="4" class="size-slider" id="penSizeSlider">
+                        </div>
+                    </div>
+                    <div class="tool-wrapper">
+                        <button class="tool-icon" data-tool="highlight" id="highlightToolBtn"><i class="fas fa-highlighter"></i></button>
+                        <div class="highlighter-color-dropdown" id="highlighterColorDropdown">
+                            <button class="highlighter-color-option" style="--highlighter-color: #fefefe;" data-color="#fefefe" title="White">&nbsp;</button>
+                            <button class="highlighter-color-option" style="--highlighter-color: #ff3333;" data-color="#ff3333" title="Red">&nbsp;</button>
+                            <button class="highlighter-color-option" style="--highlighter-color: #0090ff;" data-color="#0090ff" title="Blue">&nbsp;</button>
+                            <button class="highlighter-color-option" style="--highlighter-color: #00ff00;" data-color="#00ff00" title="Green">&nbsp;</button>
+                            <button class="highlighter-color-option" style="--highlighter-color: #ffff00;" data-color="#ffff00" title="Yellow">&nbsp;</button>
+                        </div>
+                    </div>
+                    <button class="tool-icon" data-tool="erase"><i class="fas fa-eraser"></i></button>
+                </div>
+                <button class="toolbar-btn" id="undoBtn" title="Undo (Ctrl+Z)" tabindex="-1" data-shortcut="Ctrl+Z">
+                    <i class="fas fa-undo"></i>
+                </button>
+                <button class="toolbar-btn" id="redoBtn" title="Redo (Ctrl+Y)" tabindex="-1" data-shortcut="Ctrl+Y">
+                    <i class="fas fa-redo"></i>
+                </button>
+                <button class="toolbar-btn" id="resetBtn" title="Clear All" tabindex="-1">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Tab Content Panels -->
+        <div class="tab-content">
+            <!-- Tab panels will be created dynamically by JavaScript -->
+        </div>
+    </div>
+    
+    <script type="module" src="app.js"></script>
+</body>
+</html> 

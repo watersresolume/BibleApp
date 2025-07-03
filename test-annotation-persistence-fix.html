@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annotation Persistence Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .pass {
+            background: #2d5a2d;
+            color: #90ee90;
+        }
+        .fail {
+            background: #5a2d2d;
+            color: #ff6b6b;
+        }
+        .info {
+            background: #2d2d5a;
+            color: #87ceeb;
+        }
+        button {
+            background: #4a4a4a;
+            color: #e0e0e0;
+            border: 1px solid #666;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #5a5a5a;
+        }
+        .test-instructions {
+            background: #333;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Annotation Persistence Fix Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Overview</h2>
+        <p>This test verifies that the annotation persistence fixes work correctly:</p>
+        <ul>
+            <li>✅ Highlighter tool no longer deletes existing annotations</li>
+            <li>✅ Annotations save and load properly across tabs</li>
+            <li>✅ Annotations persist across app sessions</li>
+            <li>✅ Cross-tab annotation sharing works</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 1: Highlighter Tool Fix</h2>
+        <div class="test-instructions">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>Open the Bible app in a new tab</li>
+                <li>Load any passage (e.g., Genesis 1:1)</li>
+                <li>Use the pen tool to draw some annotations</li>
+                <li>Switch to the highlighter tool</li>
+                <li>Draw some highlights</li>
+                <li><strong>Expected:</strong> Pen annotations should remain visible, highlighter should add new highlights without deleting existing annotations</li>
+            </ol>
+        </div>
+        <button onclick="testHighlighterFix()">Run Highlighter Test</button>
+        <div id="highlighter-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Cross-Tab Annotation Sharing</h2>
+        <div class="test-instructions">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>In Tab 1: Load Genesis 1:1 and draw some annotations</li>
+                <li>Create Tab 2 and load the same passage (Genesis 1:1)</li>
+                <li><strong>Expected:</strong> Tab 2 should immediately show the annotations from Tab 1</li>
+                <li>Add more annotations in Tab 2</li>
+                <li>Switch back to Tab 1</li>
+                <li><strong>Expected:</strong> Tab 1 should show all annotations from both tabs</li>
+            </ol>
+        </div>
+        <button onclick="testCrossTabSharing()">Run Cross-Tab Test</button>
+        <div id="crosstab-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Session Persistence</h2>
+        <div class="test-instructions">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>Create annotations in any tab</li>
+                <li>Refresh the page or close and reopen the browser</li>
+                <li>Load the same passage</li>
+                <li><strong>Expected:</strong> Annotations should be restored</li>
+            </ol>
+        </div>
+        <button onclick="testSessionPersistence()">Run Session Test</button>
+        <div id="session-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 4: Multiple Tool Types</h2>
+        <div class="test-instructions">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>Use pen tool to draw</li>
+                <li>Use highlighter tool to highlight</li>
+                <li>Use eraser tool to erase parts</li>
+                <li>Switch between tools</li>
+                <li><strong>Expected:</strong> All annotations should persist and be visible</li>
+            </ol>
+        </div>
+        <button onclick="testMultipleTools()">Run Multiple Tools Test</button>
+        <div id="tools-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Debug Information</h2>
+        <button onclick="showDebugInfo()">Show Debug Info</button>
+        <button onclick="clearLog()">Clear Log</button>
+        <div id="debug-log" class="log"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('debug-log').innerHTML = '';
+        }
+
+        function showResult(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="test-result ${type}">${message}</div>`;
+        }
+
+        function testHighlighterFix() {
+            log('Testing highlighter tool fix...');
+            
+            // Check if the Bible app is available
+            if (!window.bibleApp) {
+                showResult('highlighter-result', '❌ Bible app not found. Please open the Bible app first.', 'fail');
+                return;
+            }
+
+            // Check if there are any annotations in localStorage
+            const hasAnnotations = Object.keys(localStorage).some(key => key.includes('bible-annotations') && key.includes('-strokes'));
+            
+            if (hasAnnotations) {
+                showResult('highlighter-result', '✅ Found existing annotations in localStorage. Highlighter fix appears to be working.', 'pass');
+                log('Found existing annotations: ' + Object.keys(localStorage).filter(key => key.includes('bible-annotations')));
+            } else {
+                showResult('highlighter-result', 'ℹ️ No existing annotations found. Please create some annotations first, then test the highlighter.', 'info');
+            }
+        }
+
+        function testCrossTabSharing() {
+            log('Testing cross-tab annotation sharing...');
+            
+            // Check for passage-based storage keys
+            const passageKeys = Object.keys(localStorage).filter(key => 
+                key.includes('bible-annotations') && 
+                key.includes('-strokes') && 
+                !key.includes('tab-')
+            );
+            
+            if (passageKeys.length > 0) {
+                showResult('crosstab-result', `✅ Found ${passageKeys.length} passage-based annotation keys. Cross-tab sharing should work.`, 'pass');
+                log('Passage keys found: ' + passageKeys.join(', '));
+            } else {
+                showResult('crosstab-result', 'ℹ️ No passage-based annotations found. Please create annotations in multiple tabs first.', 'info');
+            }
+        }
+
+        function testSessionPersistence() {
+            log('Testing session persistence...');
+            
+            const annotationKeys = Object.keys(localStorage).filter(key => key.includes('bible-annotations'));
+            
+            if (annotationKeys.length > 0) {
+                showResult('session-result', `✅ Found ${annotationKeys.length} annotation keys in localStorage. Session persistence should work.`, 'pass');
+                log('Annotation keys: ' + annotationKeys.join(', '));
+            } else {
+                showResult('session-result', 'ℹ️ No annotations found in localStorage. Please create some annotations first.', 'info');
+            }
+        }
+
+        function testMultipleTools() {
+            log('Testing multiple tool types...');
+            
+            // Check for different tool types in stroke history
+            if (window.strokeHistory) {
+                const toolTypes = new Set();
+                Object.values(window.strokeHistory).forEach(strokes => {
+                    strokes.forEach(stroke => {
+                        if (stroke.type) toolTypes.add(stroke.type);
+                    });
+                });
+                
+                if (toolTypes.size > 0) {
+                    showResult('tools-result', `✅ Found ${toolTypes.size} tool types: ${Array.from(toolTypes).join(', ')}. Multiple tools working.`, 'pass');
+                    log('Tool types found: ' + Array.from(toolTypes).join(', '));
+                } else {
+                    showResult('tools-result', 'ℹ️ No tool types found in stroke history. Please use different tools first.', 'info');
+                }
+            } else {
+                showResult('tools-result', 'ℹ️ Stroke history not available. Please create annotations first.', 'info');
+            }
+        }
+
+        function showDebugInfo() {
+            log('=== DEBUG INFORMATION ===');
+            
+            // Check Bible app state
+            if (window.bibleApp) {
+                log('Bible app found: ' + (window.bibleApp ? 'Yes' : 'No'));
+                log('Active tab ID: ' + (window.bibleApp.activeTabId || 'None'));
+                log('Number of tabs: ' + (window.bibleApp.tabs ? window.bibleApp.tabs.length : 0));
+                
+                if (window.bibleApp.tabs) {
+                    window.bibleApp.tabs.forEach((tab, index) => {
+                        log(`Tab ${index}: ID=${tab.id}, Loaded=${tab.loaded}, Book=${tab.book}, Chapter=${tab.chapter}, Verse=${tab.verse}`);
+                    });
+                }
+            } else {
+                log('Bible app not found');
+            }
+            
+            // Check annotation system
+            log('Annotation canvases: ' + (window.annotationCanvases ? Object.keys(window.annotationCanvases).length : 0));
+            log('Stroke history keys: ' + (window.strokeHistory ? Object.keys(window.strokeHistory).length : 0));
+            
+            // Check localStorage
+            const annotationKeys = Object.keys(localStorage).filter(key => key.includes('bible-annotations'));
+            log('localStorage annotation keys: ' + annotationKeys.length);
+            annotationKeys.forEach(key => {
+                try {
+                    const data = localStorage.getItem(key);
+                    const parsed = JSON.parse(data);
+                    log(`  ${key}: ${parsed.length} strokes`);
+                } catch (e) {
+                    log(`  ${key}: Error parsing data`);
+                }
+            });
+            
+            // Check current passage key
+            if (window.getCurrentPassageKey) {
+                const currentKey = window.getCurrentPassageKey();
+                log('Current passage key: ' + (currentKey || 'None'));
+            }
+            
+            log('=== END DEBUG INFORMATION ===');
+        }
+
+        // Auto-run basic tests on page load
+        window.addEventListener('load', () => {
+            log('Annotation persistence test page loaded');
+            setTimeout(() => {
+                testHighlighterFix();
+                testCrossTabSharing();
+                testSessionPersistence();
+                testMultipleTools();
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 

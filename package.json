@@ -1,0 +1,23 @@
+{
+  "name": "bible-app",
+  "version": "1.0.0",
+  "description": "Minimalist Bible App for Portrait-Oriented Touchscreen TV",
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "package-win": "electron-packager . BibleApp --platform=win32 --arch=x64 --out=dist --overwrite"
+  },
+  "keywords": [
+    "bible",
+    "touchscreen",
+    "tv",
+    "web-app"
+  ],
+  "author": "Bible App Team",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-packager": "^17.1.2"
+  }
+}

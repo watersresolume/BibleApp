@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross-Tab Annotation Sharing Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+        }
+        .test-section {
+            background: #2a2a2a;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .test-step {
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .expected-result {
+            background: #1a3a1a;
+            border: 1px solid #4a4;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #3a1a1a;
+            border: 1px solid #a44;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        button {
+            background: #4a9eff;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            color: white;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #3a8eff;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.success {
+            background: #1a3a1a;
+            border: 1px solid #4a4;
+        }
+        .status.error {
+            background: #3a1a1a;
+            border: 1px solid #a44;
+        }
+        .highlight {
+            background: #4a4a1a;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cross-Tab Annotation Sharing Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Scenario: Annotations Shared Across Tabs</h2>
+        
+        <div class="highlight">
+            <h3>🎯 Primary Goal</h3>
+            <p>Verify that annotations created in one tab are immediately visible in other tabs for the same Bible passage.</p>
+        </div>
+        
+        <div class="test-step">
+            <h3>Step 1: Open the Bible App</h3>
+            <p>Navigate to the main Bible app and ensure it's loaded properly.</p>
+            <button onclick="openBibleApp()">Open Bible App</button>
+        </div>
+        
+        <div class="test-step">
+            <h3>Step 2: Create Annotations in First Tab</h3>
+            <p>1. Make sure you're on Genesis 1:1 (ESV) in the first tab</p>
+            <p>2. Use the pen tool to draw some annotations</p>
+            <p>3. Use the highlighter to highlight some text</p>
+            <p>4. Verify annotations are visible and saved</p>
+        </div>
+        
+        <div class="test-step">
+            <h3>Step 3: Create Second Tab with Same Passage</h3>
+            <p>1. Click the "+" button to create a new tab</p>
+            <p>2. Navigate to Genesis 1:1 (ESV) in the new tab</p>
+            <p>3. Click the load button</p>
+            <p>4. <strong>EXPECTED:</strong> The annotations from Tab 1 should be immediately visible</p>
+        </div>
+        
+        <div class="test-step">
+            <h3>Step 4: Add More Annotations in Second Tab</h3>
+            <p>1. In Tab 2, add more annotations using different colors</p>
+            <p>2. Verify new annotations are visible</p>
+        </div>
+        
+        <div class="test-step">
+            <h3>Step 5: Switch Back to First Tab</h3>
+            <p>1. Click on Tab 1 to switch back</p>
+            <p>2. <strong>EXPECTED:</strong> All annotations from both tabs should be visible</p>
+            <p>3. The annotations should be exactly the same as in Tab 2</p>
+        </div>
+        
+        <div class="test-step">
+            <h3>Step 6: Test Undo/Redo Across Tabs</h3>
+            <p>1. In Tab 1, use the undo button to remove recent annotations</p>
+            <p>2. Switch to Tab 2</p>
+            <p>3. <strong>EXPECTED:</strong> The undo action should be reflected in Tab 2</p>
+            <p>4. Use redo in Tab 2</p>
+            <p>5. Switch back to Tab 1</p>
+            <p>6. <strong>EXPECTED:</strong> The redo action should be reflected in Tab 1</p>
+        </div>
+        
+        <div class="test-step">
+            <h3>Step 7: Test Different Passages</h3>
+            <p>1. In Tab 1, change to Genesis 1:2 and load it</p>
+            <p>2. <strong>EXPECTED:</strong> Annotations should clear (new passage)</p>
+            <p>3. Add some annotations to Genesis 1:2</p>
+            <p>4. In Tab 2, change to Genesis 1:2 and load it</p>
+            <p>5. <strong>EXPECTED:</strong> The Genesis 1:2 annotations should be visible</p>
+        </div>
+        
+        <div class="test-step">
+            <h3>Step 8: Return to Original Passage</h3>
+            <p>1. In Tab 1, change back to Genesis 1:1 and load it</p>
+            <p>2. <strong>EXPECTED:</strong> Original Genesis 1:1 annotations should restore</p>
+            <p>3. Switch to Tab 2, change to Genesis 1:1 and load it</p>
+            <p>4. <strong>EXPECTED:</strong> Same Genesis 1:1 annotations should be visible</p>
+        </div>
+    </div>
+    
+    <div class="expected-result">
+        <h3>✅ Expected Results:</h3>
+        <ul>
+            <li>Annotations created in one tab are immediately visible in other tabs for the same passage</li>
+            <li>Undo/redo actions are synchronized across tabs for the same passage</li>
+            <li>Annotations are tied to specific passages (book, chapter, verse, translation)</li>
+            <li>Annotations clear when loading a new passage</li>
+            <li>Annotations restore when returning to a previously annotated passage</li>
+            <li>Old tab-specific annotations are automatically migrated to the new format</li>
+        </ul>
+    </div>
+    
+    <div class="warning">
+        <h3>⚠️ Important Notes:</h3>
+        <ul>
+            <li>Both tabs must be on the <strong>exact same passage</strong> (book, chapter, verse, translation) for annotations to share</li>
+            <li>Annotations are shared in real-time - changes in one tab immediately appear in other tabs</li>
+            <li>If annotations don't appear, check the browser console for migration logs</li>
+            <li>Make sure both tabs have loaded the passage (click the load button)</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>Technical Details</h2>
+        <p><strong>Storage Key Format:</strong> <code>bible-annotations-{book}-{chapter}-{verse}-{verseEnd}-{translation}</code></p>
+        <p><strong>Example:</strong> <code>bible-annotations-Genesis-1-1-1-ESV</code></p>
+        <p><strong>Migration:</strong> Old tab-specific keys are automatically converted to passage-based keys on app startup</p>
+        <p><strong>History:</strong> Undo/redo stacks are now passage-based and shared across tabs</p>
+    </div>
+    
+    <div id="status"></div>
+    
+    <script>
+        function openBibleApp() {
+            window.open('index.html', '_blank');
+        }
+        
+        function showStatus(message, type = 'success') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        // Test localStorage functionality
+        function testStorage() {
+            try {
+                const testKey = 'test-cross-tab-annotations';
+                const testData = { test: 'data' };
+                localStorage.setItem(testKey, JSON.stringify(testData));
+                const retrieved = JSON.parse(localStorage.getItem(testKey));
+                localStorage.removeItem(testKey);
+                
+                if (retrieved.test === 'data') {
+                    showStatus('✅ localStorage is working correctly', 'success');
+                } else {
+                    showStatus('❌ localStorage test failed', 'error');
+                }
+            } catch (e) {
+                showStatus('❌ localStorage is not available: ' + e.message, 'error');
+            }
+        }
+        
+        // Run storage test on load
+        window.addEventListener('DOMContentLoaded', testStorage);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Console</title>
+    <style>
+        body { 
+            background: #1a1a1a; 
+            color: #e0e0e0; 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+        }
+        .debug-output { 
+            background: #2a2a2a; 
+            border: 1px solid #404040; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+        }
+        .error { color: #ff6b6b; }
+        .success { color: #51cf66; }
+        .info { color: #74c0fc; }
+    </style>
+</head>
+<body>
+    <h1>Debug Console</h1>
+    <div id="output"></div>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `debug-output ${type}`;
+            div.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            output.appendChild(div);
+            console.log(message);
+        }
+        
+        log('Starting debug session...', 'info');
+        
+        // Test 1: Check if DOM is ready
+        log('DOM ready: ' + (document.readyState === 'complete'), 'info');
+        
+        // Test 2: Check if we can find the app container
+        const app = document.getElementById('app');
+        log('App container found: ' + !!app, app ? 'success' : 'error');
+        
+        // Test 3: Check if we can create a simple passage selector
+        try {
+            const testDiv = document.createElement('div');
+            testDiv.innerHTML = `
+                <div style="background: #2a2a2a; padding: 15px; margin: 10px 0; border: 1px solid #404040;">
+                    <h3>Test Passage Selector</h3>
+                    <select style="background: #404040; color: #e0e0e0; padding: 8px; margin: 5px;">
+                        <option>Test Book</option>
+                    </select>
+                    <button style="background: #4a9eff; color: white; padding: 8px 16px; border: none; border-radius: 6px;">
+                        Test Load
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(testDiv);
+            log('Test passage selector created successfully', 'success');
+        } catch (error) {
+            log('Failed to create test passage selector: ' + error.message, 'error');
+        }
+        
+        // Test 4: Check if we can load the main app
+        log('Attempting to load main app...', 'info');
+        
+        // Create a simple version of the app structure
+        const appContainer = document.createElement('div');
+        appContainer.id = 'app';
+        appContainer.innerHTML = `
+            <div style="background: rgba(30, 30, 30, 0.95); padding: 15px; border-bottom: 1px solid #404040;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <button style="background: #232323; color: #4a9eff; border: none; padding: 10px; border-radius: 50%;">+</button>
+                    </div>
+                    <div>
+                        <button style="background: #2a2a2a; border: 2px solid #404040; padding: 8px; color: #e0e0e0;">Pen</button>
+                        <button style="background: #2a2a2a; border: 2px solid #404040; padding: 8px; color: #e0e0e0;">Undo</button>
+                    </div>
+                </div>
+            </div>
+            <div style="flex: 1; display: flex; flex-direction: column;">
+                <div style="background: #2a2a2a; padding: 15px 20px; border-bottom: 1px solid #404040;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <select style="background: #404040; border: 2px solid #505050; padding: 8px 12px; color: #e0e0e0; min-width: 80px;">
+                            <option>ESV</option>
+                            <option>NIV</option>
+                        </select>
+                        <select style="background: #404040; border: 2px solid #505050; padding: 8px 12px; color: #e0e0e0; min-width: 150px;">
+                            <option>Book</option>
+                            <option>Genesis</option>
+                            <option>Exodus</option>
+                        </select>
+                        <select style="background: #404040; border: 2px solid #505050; padding: 8px 12px; color: #e0e0e0; min-width: 80px;">
+                            <option>Chapter</option>
+                        </select>
+                        <select style="background: #404040; border: 2px solid #505050; padding: 8px 12px; color: #e0e0e0; min-width: 80px;">
+                            <option>Verse</option>
+                        </select>
+                        <span style="color:#888;">-</span>
+                        <select style="background: #404040; border: 2px solid #505050; padding: 8px 12px; color: #e0e0e0; min-width: 80px;">
+                            <option>Verse</option>
+                        </select>
+                        <button style="background: #4a9eff; border: none; padding: 8px 16px; color: white; border-radius: 6px;">
+                            <i>→</i>
+                        </button>
+                    </div>
+                </div>
+                <div style="flex: 1; padding: 20px; background: #1a1a1a;">
+                    <p>Reading area - passage selector should be visible above</p>
+                </div>
+            </div>
+        `;
+        
+        // Replace the current body content
+        document.body.innerHTML = '';
+        document.body.appendChild(appContainer);
+        
+        log('Main app structure created', 'success');
+        log('If you can see the passage selector above, the issue is with the JavaScript module loading', 'info');
+        log('If you cannot see the passage selector, the issue is with CSS or DOM structure', 'error');
+        
+        // Test 5: Try to load the actual app.js
+        log('Attempting to load app.js...', 'info');
+        
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = './app.js';
+        script.onload = () => log('app.js loaded successfully', 'success');
+        script.onerror = (error) => log('Failed to load app.js: ' + error.message, 'error');
+        document.head.appendChild(script);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+        }
+        .navigation-tabs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .nav-tab {
+            background: #2a2a2a;
+            border: 2px solid #404040;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .nav-tab:hover {
+            border-color: #4a9eff;
+        }
+        .nav-tab.active {
+            background: #4a9eff;
+            border-color: #4a9eff;
+            color: #ffffff;
+        }
+        .navigation-panels {
+            background: rgba(30, 30, 30, 0.95);
+            border: 1px solid #404040;
+            display: none;
+            padding: 20px;
+        }
+        .navigation-panels.active {
+            display: block;
+        }
+        .nav-panel {
+            display: none;
+        }
+        .nav-panel.active {
+            display: block;
+        }
+        .panel-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        .nav-item {
+            background: #2a2a2a;
+            border: 2px solid #404040;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #e0e0e0;
+            cursor: pointer;
+            text-align: center;
+        }
+        .nav-item:hover {
+            border-color: #4a9eff;
+        }
+        .nav-item.selected {
+            background: #4a9eff;
+            border-color: #4a9eff;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Navigation Test</h1>
+    
+    <div class="navigation-tabs">
+        <button class="nav-tab active" data-tab="books">Books</button>
+        <button class="nav-tab" data-tab="chapters">Chapters</button>
+        <button class="nav-tab" data-tab="verses">Verses</button>
+        <div class="current-location">
+            <span id="currentLocation">Genesis 1:1</span>
+        </div>
+    </div>
+    
+    <div class="navigation-panels">
+        <div class="nav-panel active" id="booksPanel">
+            <div class="panel-content" id="booksList">
+                <!-- Books will be populated dynamically -->
+            </div>
+        </div>
+        <div class="nav-panel" id="chaptersPanel">
+            <div class="panel-content" id="chaptersList">
+                <!-- Chapters will be populated dynamically -->
+            </div>
+        </div>
+        <div class="nav-panel" id="versesPanel">
+            <div class="panel-content" id="versesList">
+                <!-- Verses will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+    
+    <div id="debug"></div>
+    
+    <script>
+        // Simple test script
+        document.addEventListener('DOMContentLoaded', function() {
+            const debug = document.getElementById('debug');
+            
+            // Tab switching
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const tabName = e.target.dataset.tab;
+                    debug.innerHTML += `<p>Tab clicked: ${tabName}</p>`;
+                    switchTab(tabName);
+                });
+            });
+            
+            function switchTab(tabName) {
+                // Update tab states
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+                
+                // Update panel states
+                document.querySelectorAll('.nav-panel').forEach(panel => {
+                    panel.classList.remove('active');
+                });
+                document.getElementById(`${tabName}Panel`).classList.add('active');
+                
+                // Show navigation panels
+                const panels = document.querySelector('.navigation-panels');
+                panels.classList.add('active');
+                
+                debug.innerHTML += `<p>Switched to tab: ${tabName}</p>`;
+                
+                // Populate content
+                if (tabName === 'books') {
+                    populateBooks();
+                }
+            }
+            
+            function populateBooks() {
+                const booksList = document.getElementById('booksList');
+                const books = ['Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy'];
+                
+                let html = '';
+                books.forEach(book => {
+                    html += `<div class="nav-item" data-book="${book}">${book}</div>`;
+                });
+                booksList.innerHTML = html;
+                
+                debug.innerHTML += `<p>Books populated: ${books.length} books</p>`;
+                
+                // Add event listeners
+                document.querySelectorAll('#booksList .nav-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        debug.innerHTML += `<p>Book clicked: ${e.target.dataset.book}</p>`;
+                    });
+                });
+            }
+            
+            // Initialize
+            populateBooks();
+        });
+    </script>
+</body>
+</html> 

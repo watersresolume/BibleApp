@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Dropdowns</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+        }
+        .debug-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .debug-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #3a3a3a;
+        }
+        .debug-info {
+            background: #333;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .test-btn {
+            padding: 10px 20px;
+            background: #4a9eff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-btn:hover {
+            background: #3a8eef;
+        }
+        .toolbar {
+            background: rgba(30, 30, 30, 0.95);
+            padding: 15px 25px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .tool-slider {
+            display: flex;
+            gap: 4px;
+            position: relative;
+        }
+        .tool-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>Debug Dropdowns</h1>
+        
+        <div class="debug-section">
+            <h2>Toolbar with Dropdowns</h2>
+            <div class="toolbar">
+                <div class="toolbar-right">
+                    <div class="tool-slider">
+                        <div class="tool-wrapper">
+                            <button class="tool-icon selected" data-tool="pen" id="penToolBtn"><i class="fas fa-pen"></i></button>
+                            <div class="pen-color-dropdown" id="penColorDropdown">
+                                <button class="pen-color-option" style="--pen-color: #fefefe;" data-color="#fefefe" title="White">&nbsp;</button>
+                                <button class="pen-color-option" style="--pen-color: #ff3333;" data-color="#ff3333" title="Red">&nbsp;</button>
+                                <button class="pen-color-option" style="--pen-color: #0090ff;" data-color="#0090ff" title="Blue">&nbsp;</button>
+                                <button class="pen-color-option" style="--pen-color: #00ff00;" data-color="#00ff00" title="Green">&nbsp;</button>
+                                <button class="pen-color-option" style="--pen-color: #ffff00;" data-color="#ffff00" title="Yellow">&nbsp;</button>
+                                <div class="advanced-arrow" data-tool="pen">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tool-wrapper">
+                            <button class="tool-icon" data-tool="highlight" id="highlightToolBtn"><i class="fas fa-highlighter"></i></button>
+                            <div class="highlighter-color-dropdown" id="highlighterColorDropdown">
+                                <button class="highlighter-color-option" style="--highlighter-color: #fefefe;" data-color="#fefefe" title="White">&nbsp;</button>
+                                <button class="highlighter-color-option" style="--highlighter-color: #ff3333;" data-color="#ff3333" title="Red">&nbsp;</button>
+                                <button class="highlighter-color-option" style="--highlighter-color: #0090ff;" data-color="#0090ff" title="Blue">&nbsp;</button>
+                                <button class="highlighter-color-option" style="--highlighter-color: #00ff00;" data-color="#00ff00" title="Green">&nbsp;</button>
+                                <button class="highlighter-color-option" style="--highlighter-color: #ffff00;" data-color="#ffff00" title="Yellow">&nbsp;</button>
+                                <div class="advanced-arrow" data-tool="highlight">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="tool-icon" data-tool="erase"><i class="fas fa-eraser"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="debug-section">
+            <h2>Controls</h2>
+            <button class="test-btn" onclick="togglePenDropdown()">Toggle Pen Dropdown</button>
+            <button class="test-btn" onclick="toggleHighlightDropdown()">Toggle Highlight Dropdown</button>
+            <button class="test-btn" onclick="debugDropdowns()">Debug Dropdowns</button>
+            <button class="test-btn" onclick="forceShowDropdowns()">Force Show All</button>
+        </div>
+        
+        <div class="debug-section">
+            <h2>Debug Info</h2>
+            <div id="debugInfo" class="debug-info">Click "Debug Dropdowns" to see info</div>
+        </div>
+    </div>
+    
+    <script>
+        const penBtn = document.getElementById('penToolBtn');
+        const highlightBtn = document.getElementById('highlightToolBtn');
+        const penColorDropdown = document.getElementById('penColorDropdown');
+        const highlighterColorDropdown = document.getElementById('highlighterColorDropdown');
+        
+        function togglePenDropdown() {
+            penColorDropdown.classList.toggle('show');
+            highlighterColorDropdown.classList.remove('show');
+            debugDropdowns();
+        }
+        
+        function toggleHighlightDropdown() {
+            highlighterColorDropdown.classList.toggle('show');
+            penColorDropdown.classList.remove('show');
+            debugDropdowns();
+        }
+        
+        function forceShowDropdowns() {
+            penColorDropdown.classList.add('show');
+            highlighterColorDropdown.classList.add('show');
+            debugDropdowns();
+        }
+        
+        function debugDropdowns() {
+            const debugInfo = document.getElementById('debugInfo');
+            const penRect = penColorDropdown.getBoundingClientRect();
+            const highlightRect = highlighterColorDropdown.getBoundingClientRect();
+            const penBtnRect = penBtn.getBoundingClientRect();
+            
+            debugInfo.innerHTML = `
+                <strong>Pen Dropdown:</strong><br>
+                Classes: ${penColorDropdown.className}<br>
+                Display: ${window.getComputedStyle(penColorDropdown).display}<br>
+                Visibility: ${window.getComputedStyle(penColorDropdown).visibility}<br>
+                Opacity: ${window.getComputedStyle(penColorDropdown).opacity}<br>
+                Transform: ${window.getComputedStyle(penColorDropdown).transform}<br>
+                Position: ${window.getComputedStyle(penColorDropdown).position}<br>
+                Top: ${window.getComputedStyle(penColorDropdown).top}<br>
+                Left: ${window.getComputedStyle(penColorDropdown).left}<br>
+                Z-index: ${window.getComputedStyle(penColorDropdown).zIndex}<br>
+                Pointer-events: ${window.getComputedStyle(penColorDropdown).pointerEvents}<br>
+                Bounding Rect: ${penRect.top}, ${penRect.left}, ${penRect.width}, ${penRect.height}<br>
+                <br>
+                <strong>Highlight Dropdown:</strong><br>
+                Classes: ${highlighterColorDropdown.className}<br>
+                Display: ${window.getComputedStyle(highlighterColorDropdown).display}<br>
+                Visibility: ${window.getComputedStyle(highlighterColorDropdown).visibility}<br>
+                Opacity: ${window.getComputedStyle(highlighterColorDropdown).opacity}<br>
+                Transform: ${window.getComputedStyle(highlighterColorDropdown).transform}<br>
+                Bounding Rect: ${highlightRect.top}, ${highlightRect.left}, ${highlightRect.width}, ${highlightRect.height}<br>
+                <br>
+                <strong>Pen Button:</strong><br>
+                Bounding Rect: ${penBtnRect.top}, ${penBtnRect.left}, ${penBtnRect.width}, ${penBtnRect.height}<br>
+                <br>
+                <strong>Viewport:</strong><br>
+                Width: ${window.innerWidth}, Height: ${window.innerHeight}<br>
+            `;
+        }
+        
+        // Add click handlers
+        penBtn.addEventListener('click', togglePenDropdown);
+        highlightBtn.addEventListener('click', toggleHighlightDropdown);
+        
+        // Initial debug
+        setTimeout(debugDropdowns, 100);
+    </script>
+</body>
+</html> 

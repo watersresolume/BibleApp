@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NLT Accuracy Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .section {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .passage-test {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .reference {
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .expected {
+            background: #e9ecef;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 5px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .actual {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 5px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .stats {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 NLT Accuracy Verification</h1>
+    
+    <div class="section">
+        <h2>📊 Verification Status</h2>
+        <div id="status">
+            <p>Click "Start Verification" to check NLT accuracy...</p>
+        </div>
+        <button class="button" onclick="startVerification()">Start Verification</button>
+        <button class="button" onclick="testSpecificPassage()">Test Custom Passage</button>
+    </div>
+    
+    <div class="container">
+        <div class="section">
+            <h2>✅ Key Passages Test</h2>
+            <div id="keyPassages">
+                <p>Verification results will appear here...</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>📈 Accuracy Statistics</h2>
+            <div id="statistics">
+                <p>Statistics will appear here...</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>🎯 Custom Passage Test</h2>
+        <div>
+            <label for="customBook">Book:</label>
+            <input type="text" id="customBook" placeholder="Genesis" style="margin: 5px;">
+            
+            <label for="customChapter">Chapter:</label>
+            <input type="number" id="customChapter" placeholder="1" style="margin: 5px;">
+            
+            <label for="customVerse">Verse:</label>
+            <input type="number" id="customVerse" placeholder="1" style="margin: 5px;">
+            
+            <button class="button" onclick="testCustomPassage()">Test Passage</button>
+        </div>
+        <div id="customResult">
+            <p>Custom test results will appear here...</p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the NLT data
+        import { getNLTText } from './nlt-data.js';
+        
+        // Known accurate NLT passages for verification
+        const knownAccuratePassages = {
+            'Genesis 1:1': 'In the beginning God created the heavens and the earth.',
+            'Genesis 1:2': 'The earth was formless and empty, and darkness covered the deep waters. And the Spirit of God was hovering over the surface of the waters.',
+            'Genesis 1:3': 'Then God said, "Let there be light," and there was light.',
+            'John 3:16': 'For this is how God loved the world: He gave his one and only Son, so that everyone who believes in him will not perish but have eternal life.',
+            'John 3:17': 'God sent his Son into the world not to judge the world, but to save the world through him.',
+            'Psalm 23:1': 'The LORD is my shepherd; I have all that I need.',
+            'Psalm 23:2': 'He lets me rest in green meadows; he leads me beside peaceful streams.',
+            'Matthew 28:19': 'Therefore, go and make disciples of all the nations, baptizing them in the name of the Father and the Son and the Holy Spirit.',
+            'Matthew 28:20': 'Teach these new disciples to obey all the commands I have given you. And be sure of this: I am with you always, even to the end of the age."',
+            'Romans 3:23': 'For everyone has sinned; we all fall short of God\'s glorious standard.',
+            'Romans 6:23': 'For the wages of sin is death, but the free gift of God is eternal life through Christ Jesus our Lord.',
+            'Ephesians 2:8': 'God saved you by his grace when you believed. And you can\'t take credit for this; it is a gift from God.',
+            'Ephesians 2:9': 'Salvation is not a reward for the good things we have done, so none of us can boast about it.',
+            'Philippians 4:13': 'For I can do everything through Christ, who gives me strength.',
+            '1 John 1:9': 'But if we confess our sins to him, he is faithful and just to forgive us our sins and to cleanse us from all wickedness.',
+            'Revelation 3:20': 'Look! I stand at the door and knock. If you hear my voice and open the door, I will come in, and we will share a meal together as friends.'
+        };
+
+        window.startVerification = function() {
+            const statusDiv = document.getElementById('status');
+            const keyPassagesDiv = document.getElementById('keyPassages');
+            const statisticsDiv = document.getElementById('statistics');
+            
+            statusDiv.innerHTML = '<div class="success">🔄 Running verification tests...</div>';
+            
+            let totalTests = 0;
+            let passedTests = 0;
+            let failedTests = 0;
+            let results = '<h3>Key Passages Verification:</h3>';
+            
+            // Test each known passage
+            for (const [reference, expectedText] of Object.entries(knownAccuratePassages)) {
+                totalTests++;
+                
+                // Parse reference
+                const [book, chapterVerse] = reference.split(' ');
+                const [chapter, verse] = chapterVerse.split(':');
+                
+                // Get actual text from NLT data
+                const actualText = getNLTText(book, parseInt(chapter), parseInt(verse));
+                
+                if (actualText) {
+                    // Remove verse number from actual text for comparison
+                    const cleanActualText = actualText.replace(/^\d+\s+/, '');
+                    
+                    if (cleanActualText === expectedText) {
+                        passedTests++;
+                        results += `
+                            <div class="passage-test">
+                                <div class="reference">✅ ${reference}</div>
+                                <div class="expected"><strong>Expected:</strong> ${expectedText}</div>
+                                <div class="actual"><strong>Actual:</strong> ${cleanActualText}</div>
+                            </div>
+                        `;
+                    } else {
+                        failedTests++;
+                        results += `
+                            <div class="passage-test">
+                                <div class="reference">❌ ${reference}</div>
+                                <div class="expected"><strong>Expected:</strong> ${expectedText}</div>
+                                <div class="actual"><strong>Actual:</strong> ${cleanActualText}</div>
+                            </div>
+                        `;
+                    }
+                } else {
+                    failedTests++;
+                    results += `
+                        <div class="passage-test">
+                            <div class="reference">❌ ${reference}</div>
+                            <div class="expected"><strong>Expected:</strong> ${expectedText}</div>
+                            <div class="actual"><strong>Actual:</strong> NOT FOUND</div>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Update results
+            keyPassagesDiv.innerHTML = results;
+            
+            // Update statistics
+            const accuracy = totalTests > 0 ? Math.round((passedTests / totalTests) * 100) : 0;
+            const statusClass = accuracy === 100 ? 'success' : accuracy >= 90 ? 'warning' : 'error';
+            
+            statisticsDiv.innerHTML = `
+                <div class="stats">
+                    <h3>Accuracy Statistics:</h3>
+                    <p><strong>Total Tests:</strong> ${totalTests}</p>
+                    <p><strong>Passed:</strong> ${passedTests}</p>
+                    <p><strong>Failed:</strong> ${failedTests}</p>
+                    <p><strong>Accuracy:</strong> ${accuracy}%</p>
+                </div>
+                <div class="${statusClass}">
+                    <strong>${accuracy === 100 ? '🎉 PERFECT ACCURACY!' : accuracy >= 90 ? '⚠️ Good accuracy with minor issues' : '❌ Significant accuracy issues detected'}</strong>
+                </div>
+            `;
+            
+            // Update status
+            if (accuracy === 100) {
+                statusDiv.innerHTML = '<div class="success">✅ All NLT passages verified as 100% accurate!</div>';
+            } else if (accuracy >= 90) {
+                statusDiv.innerHTML = '<div class="warning">⚠️ NLT accuracy is good with minor issues</div>';
+            } else {
+                statusDiv.innerHTML = '<div class="error">❌ Significant accuracy issues detected</div>';
+            }
+        };
+
+        window.testCustomPassage = function() {
+            const book = document.getElementById('customBook').value;
+            const chapter = parseInt(document.getElementById('customChapter').value);
+            const verse = parseInt(document.getElementById('customVerse').value);
+            
+            if (!book || !chapter || !verse) {
+                alert('Please enter book, chapter, and verse');
+                return;
+            }
+            
+            const actualText = getNLTText(book, chapter, verse);
+            const resultDiv = document.getElementById('customResult');
+            
+            if (actualText) {
+                resultDiv.innerHTML = `
+                    <div class="passage-test">
+                        <div class="reference">📖 ${book} ${chapter}:${verse}</div>
+                        <div class="actual"><strong>NLT Text:</strong> ${actualText}</div>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="passage-test">
+                        <div class="reference">❌ ${book} ${chapter}:${verse}</div>
+                        <div class="actual"><strong>Result:</strong> Passage not found in NLT data</div>
+                    </div>
+                `;
+            }
+        };
+
+        window.testSpecificPassage = function() {
+            // Test a few specific passages to verify functionality
+            const testPassages = [
+                { book: 'Genesis', chapter: 1, verse: 1 },
+                { book: 'John', chapter: 3, verse: 16 },
+                { book: 'Psalm', chapter: 23, verse: 1 }
+            ];
+            
+            let results = '<h3>Quick Test Results:</h3>';
+            
+            testPassages.forEach(passage => {
+                const text = getNLTText(passage.book, passage.chapter, passage.verse);
+                if (text) {
+                    results += `
+                        <div class="passage-test">
+                            <div class="reference">✅ ${passage.book} ${passage.chapter}:${passage.verse}</div>
+                            <div class="actual">${text}</div>
+                        </div>
+                    `;
+                } else {
+                    results += `
+                        <div class="passage-test">
+                            <div class="reference">❌ ${passage.book} ${passage.chapter}:${passage.verse}</div>
+                            <div class="actual">Not found</div>
+                        </div>
+                    `;
+                }
+            });
+            
+            document.getElementById('keyPassages').innerHTML = results;
+        };
+    </script>
+</body>
+</html> 

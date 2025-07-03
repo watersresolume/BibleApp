@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Tabs Test - Bible App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <div class="tool-icon" data-tool="pen" title="Pen">
+                    <i class="fas fa-pen"></i>
+                </div>
+                <div class="tool-icon" data-tool="highlight" title="Highlighter">
+                    <i class="fas fa-highlighter"></i>
+                </div>
+                <div class="tool-icon" data-tool="erase" title="Eraser">
+                    <i class="fas fa-eraser"></i>
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <button id="undoBtn" class="toolbar-btn" title="Undo">↶</button>
+                <button id="redoBtn" class="toolbar-btn" title="Redo">↷</button>
+                <button id="resetBtn" class="toolbar-btn" title="Clear All">🗑</button>
+            </div>
+        </div>
+
+        <!-- Tab Bar -->
+        <div class="browser-tabs">
+            <div class="tab-bar" id="tabBar">
+                <!-- Tabs will be rendered here -->
+            </div>
+            <button class="new-tab-btn" id="newTabBtn">+</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Tab panels will be rendered here -->
+        </div>
+    </div>
+
+    <script src="bible-structure.js"></script>
+    <script src="word-data.js"></script>
+    <script src="app.js"></script>
+
+    <script>
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Testing Media Tabs functionality...');
+            
+            // Initialize the Bible app
+            window.bibleApp = new BibleApp();
+            window.bibleApp.init();
+            
+            // Initialize tool UI
+            initializeToolUI();
+            initializeUndoRedoButtons();
+            initializeClearButton();
+            
+            // Test: Create a tab and switch it to media mode
+            setTimeout(() => {
+                console.log('Creating test tab...');
+                window.bibleApp.createNewTab();
+                
+                // Get the tab ID
+                const activeTabId = window.bibleApp.activeTabId;
+                console.log('Active tab ID:', activeTabId);
+                
+                // Test mode switching after a delay
+                setTimeout(() => {
+                    console.log('Testing media mode toggle...');
+                    window.bibleApp.toggleTabMode(activeTabId);
+                    
+                    // Test switching back to bible mode
+                    setTimeout(() => {
+                        console.log('Testing bible mode toggle...');
+                        window.bibleApp.toggleTabMode(activeTabId);
+                        
+                        // Test creating another tab and leaving it in bible mode
+                        setTimeout(() => {
+                            console.log('Creating second tab in bible mode...');
+                            window.bibleApp.createNewTab();
+                            
+                            console.log('All tests completed! You can now:');
+                            console.log('1. Click on tabs to switch between them');
+                            console.log('2. Click on the active tab to toggle between bible and media mode');
+                            console.log('3. Draw annotations and see they persist across mode switches');
+                        }, 1000);
+                    }, 2000);
+                }, 2000);
+            }, 500);
+        });
+    </script>
+</body>
+</html> 

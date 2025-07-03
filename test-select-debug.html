@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Select Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        
+        .debug-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #4a9eff;
+            border-radius: 8px;
+        }
+        
+        .test-word {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px 12px;
+            background: #2a2a2a;
+            border: 1px solid #4a9eff;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .test-word:hover {
+            background: rgba(74, 158, 255, 0.1);
+        }
+        
+        .debug-log {
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Select Tool Debug Page</h1>
+    
+    <div class="debug-section">
+        <h3>Test Word Click</h3>
+        <p>Click on these test words to check functionality:</p>
+        <div class="test-word" data-word="god">God</div>
+        <div class="test-word" data-word="lord">Lord</div>
+        <div class="test-word" data-word="jesus">Jesus</div>
+        <div class="test-word" data-word="love">Love</div>
+        <div class="test-word" data-word="peace">Peace</div>
+        <div class="test-word" data-word="unknown">Unknown</div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>Debug Log</h3>
+        <div id="debugLog" class="debug-log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <script type="module">
+        import { getWordInfo, hasWordData } from './word-data.js';
+        
+        function log(message) {
+            const debugLog = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.innerHTML += `[${timestamp}] ${message}<br>`;
+            debugLog.scrollTop = debugLog.scrollHeight;
+            console.log(message);
+        }
+        
+        window.clearLog = function() {
+            document.getElementById('debugLog').innerHTML = '';
+        };
+        
+        function testWordData() {
+            log('🔍 Testing word data module...');
+            
+            // Test basic functions
+            log(`getWordInfo function: ${typeof getWordInfo}`);
+            log(`hasWordData function: ${typeof hasWordData}`);
+            
+            // Test with known words
+            const testWords = ['god', 'lord', 'jesus', 'unknown'];
+            testWords.forEach(word => {
+                try {
+                    const hasData = hasWordData(word);
+                    const wordInfo = getWordInfo(word);
+                    log(`Word "${word}": hasData=${hasData}, info=${JSON.stringify(wordInfo, null, 2)}`);
+                } catch (error) {
+                    log(`Error testing word "${word}": ${error.message}`);
+                }
+            });
+        }
+        
+        function handleTestWordClick(word, event) {
+            log(`🔍 Test word clicked: ${word}`);
+            
+            try {
+                const wordInfo = getWordInfo(word);
+                log(`Word info: ${JSON.stringify(wordInfo, null, 2)}`);
+                
+                // Create simple popup
+                showTestPopup(wordInfo, event);
+            } catch (error) {
+                log(`Error handling test word click: ${error.message}`);
+            }
+        }
+        
+        function showTestPopup(wordInfo, event) {
+            // Remove any existing popup
+            const existingPopup = document.querySelector('.test-popup');
+            if (existingPopup) {
+                existingPopup.remove();
+            }
+            
+            const popup = document.createElement('div');
+            popup.className = 'test-popup';
+            popup.style.cssText = `
+                position: fixed;
+                background: rgba(30, 30, 30, 0.98);
+                border: 2px solid #4a9eff;
+                border-radius: 8px;
+                padding: 20px;
+                z-index: 10000;
+                max-width: 300px;
+                font-size: 14px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+            `;
+            
+            popup.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="margin: 0; color: #4a9eff;">${wordInfo.word}</h3>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: #e0e0e0; font-size: 18px; cursor: pointer;">&times;</button>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>Greek:</strong> ${wordInfo.greek.text}<br>
+                    <em>${wordInfo.greek.transliteration}</em><br>
+                    ${wordInfo.greek.meaning}
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>Hebrew:</strong> ${wordInfo.hebrew.text}<br>
+                    <em>${wordInfo.hebrew.transliteration}</em><br>
+                    ${wordInfo.hebrew.meaning}
+                </div>
+                <div>
+                    <strong>Frequency:</strong> Used ${wordInfo.frequency} times
+                </div>
+            `;
+            
+            // Position popup
+            const rect = event.target.getBoundingClientRect();
+            popup.style.left = `${rect.left}px`;
+            popup.style.top = `${rect.bottom + 10}px`;
+            
+            document.body.appendChild(popup);
+            
+            log(`✅ Test popup shown for: ${wordInfo.word}`);
+        }
+        
+        // Initialize debug tests
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🔍 Debug page loaded');
+            testWordData();
+            
+            // Add click listeners to test words
+            document.querySelectorAll('.test-word').forEach(wordEl => {
+                wordEl.addEventListener('click', (event) => {
+                    const word = wordEl.getAttribute('data-word');
+                    handleTestWordClick(word, event);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

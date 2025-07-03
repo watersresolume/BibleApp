@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Touch Gesture Test - Bible App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .test-info {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .test-info h2 {
+            color: #4a9eff;
+            margin-bottom: 15px;
+        }
+        .test-info ul {
+            line-height: 1.6;
+        }
+        .test-info li {
+            margin-bottom: 8px;
+        }
+        .highlight {
+            background: #4a9eff;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .warning {
+            background: #ff6b6b;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success {
+            background: #51cf66;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h2>Touch Gesture Features Test</h2>
+        <p>This page tests the new touch gesture features added to the Bible App:</p>
+        
+        <h3>✅ New Features Added:</h3>
+        <ul>
+            <li><span class="highlight">2-Finger Scrolling</span> - Use two fingers to scroll up and down through long passages</li>
+            <li><span class="highlight">2-Finger Pinch & Zoom</span> - Pinch to zoom in/out on the text (50% to 300% zoom range)</li>
+            <li><span class="highlight">Zoom Reset Button</span> - Click the search-minus icon in the toolbar to reset zoom to 100%</li>
+            <li><span class="highlight">Zoom Indicator</span> - Shows current zoom level as a percentage</li>
+            <li><span class="highlight">Per-Tab Zoom</span> - Each tab maintains its own zoom level</li>
+        </ul>
+        
+        <h3>🔧 Technical Implementation:</h3>
+        <ul>
+            <li>Touch event handling for single-finger drawing and two-finger gestures</li>
+            <li>Gesture detection to distinguish between pinch and scroll actions</li>
+            <li>Canvas scaling for annotations to match zoom level</li>
+            <li>CSS transforms for smooth zoom transitions</li>
+            <li>Responsive design for mobile devices</li>
+        </ul>
+        
+        <h3>📱 How to Test:</h3>
+        <ul>
+            <li><span class="success">Desktop</span>: Use mouse wheel or trackpad gestures</li>
+            <li><span class="success">Mobile/Tablet</span>: Use two-finger touch gestures</li>
+            <li><span class="warning">Touch Device Required</span>: Pinch and scroll gestures only work on touch-enabled devices</li>
+        </ul>
+        
+        <h3>🎯 Gesture Instructions:</h3>
+        <ul>
+            <li><strong>Pinch to Zoom:</strong> Place two fingers on the text and move them apart (zoom in) or together (zoom out)</li>
+            <li><strong>Two-Finger Scroll:</strong> Place two fingers on the text and move them up/down to scroll</li>
+            <li><strong>Single Finger:</strong> Still works for drawing annotations when using drawing tools</li>
+        </ul>
+        
+        <p><strong>Note:</strong> Open the main Bible App (<a href="index.html" style="color: #4a9eff;">index.html</a>) to test these features with actual Bible text and annotation tools.</p>
+    </div>
+</body>
+</html> 

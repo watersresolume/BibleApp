@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annotation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-area {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: #2a2a2a;
+            border: 2px solid #444;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .bible-text {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            overflow-y: auto;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .annotation-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: auto;
+            background: transparent;
+            cursor: crosshair;
+            z-index: 9999;
+            touch-action: none;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .tool-btn {
+            padding: 10px 20px;
+            background: #444;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .tool-btn.selected {
+            background: #666;
+        }
+        .debug-info {
+            background: #333;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Annotation Test</h1>
+        <p>This is a simple test to verify that annotations work properly.</p>
+        
+        <div class="controls">
+            <button class="tool-btn selected" data-tool="pen">Pen</button>
+            <button class="tool-btn" data-tool="highlight">Highlight</button>
+            <button class="tool-btn" data-tool="erase">Erase</button>
+        </div>
+        
+        <div class="test-area">
+            <div class="bible-text">
+                <p>This is a test passage to verify annotation functionality.</p>
+                <p>You should be able to draw on this text using the pen tool.</p>
+                <p>Try highlighting text with the highlight tool.</p>
+                <p>Use the eraser to remove annotations.</p>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+            </div>
+        </div>
+        
+        <div class="debug-info" id="debugInfo">
+            Debug info will appear here...
+        </div>
+    </div>
+
+    <script>
+        // Simple annotation test
+        let currentTool = 'pen';
+        let drawing = false;
+        let lastPoint = null;
+        let canvas = null;
+        let ctx = null;
+        
+        // Initialize canvas
+        function initCanvas() {
+            const testArea = document.querySelector('.test-area');
+            const bibleText = document.querySelector('.bible-text');
+            
+            canvas = document.createElement('canvas');
+            canvas.className = 'annotation-canvas';
+            canvas.width = bibleText.offsetWidth;
+            canvas.height = bibleText.offsetHeight;
+            bibleText.appendChild(canvas);
+            
+            ctx = canvas.getContext('2d');
+            ctx.strokeStyle = '#ffff00';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            updateDebugInfo('Canvas initialized');
+        }
+        
+        // Tool selection
+        document.querySelectorAll('.tool-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                currentTool = btn.dataset.tool;
+                updateDebugInfo(`Tool changed to: ${currentTool}`);
+            });
+        });
+        
+        // Drawing functions
+        function getPointerPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+        
+        function startDrawing(e) {
+            drawing = true;
+            lastPoint = getPointerPos(e);
+            updateDebugInfo(`Started drawing with ${currentTool}`);
+        }
+        
+        function draw(e) {
+            if (!drawing) return;
+            
+            const point = getPointerPos(e);
+            
+            if (currentTool === 'erase') {
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.strokeStyle = '#000';
+            } else {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.strokeStyle = currentTool === 'highlight' ? '#ffff00' : '#ff0000';
+                ctx.globalAlpha = currentTool === 'highlight' ? 0.3 : 1.0;
+            }
+            
+            ctx.beginPath();
+            ctx.moveTo(lastPoint.x, lastPoint.y);
+            ctx.lineTo(point.x, point.y);
+            ctx.stroke();
+            
+            lastPoint = point;
+        }
+        
+        function endDrawing() {
+            drawing = false;
+            updateDebugInfo('Stopped drawing');
+        }
+        
+        // Event listeners
+        canvas.addEventListener('pointerdown', startDrawing);
+        canvas.addEventListener('pointermove', draw);
+        canvas.addEventListener('pointerup', endDrawing);
+        canvas.addEventListener('pointerleave', endDrawing);
+        
+        // Debug info
+        function updateDebugInfo(message) {
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            initCanvas();
+            updateDebugInfo('Test page loaded');
+        });
+    </script>
+</body>
+</html> 

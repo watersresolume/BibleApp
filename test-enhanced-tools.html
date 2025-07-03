@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Tools Test - Bible App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="enhanced-tools.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #2a2a2a;
+            border-radius: 12px;
+        }
+        
+        .header h1 {
+            color: #4a9eff;
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+        }
+        
+        .header p {
+            color: #888;
+            margin: 0;
+            font-size: 1.1em;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .feature-card {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #3a3a3a;
+        }
+        
+        .feature-card h3 {
+            color: #4a9eff;
+            margin: 0 0 15px 0;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .feature-card p {
+            color: #ccc;
+            margin: 0 0 15px 0;
+            font-size: 0.95em;
+        }
+        
+        .feature-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-implemented {
+            background: #51cf66;
+            color: white;
+        }
+        
+        .status-testing {
+            background: #ffd43b;
+            color: #333;
+        }
+        
+        .test-canvas-container {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 1px solid #3a3a3a;
+        }
+        
+        .test-canvas-container h3 {
+            color: #4a9eff;
+            margin: 0 0 20px 0;
+        }
+        
+        .test-canvas {
+            background: #333;
+            border: 2px dashed #4a9eff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            min-height: 300px;
+            position: relative;
+        }
+        
+        .test-canvas canvas {
+            width: 100%;
+            height: 300px;
+            background: #fff;
+            border-radius: 4px;
+            cursor: crosshair;
+        }
+        
+        .tool-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .tool-btn {
+            background: #4a9eff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+        
+        .tool-btn:hover {
+            background: #3a8eef;
+            transform: translateY(-1px);
+        }
+        
+        .tool-btn.active {
+            background: #51cf66;
+        }
+        
+        .color-picker {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #333;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .color-option.selected {
+            border-color: #4a9eff;
+            box-shadow: 0 0 10px rgba(74, 158, 255, 0.5);
+        }
+        
+        .instructions {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #4a9eff;
+        }
+        
+        .instructions h4 {
+            margin: 0 0 10px 0;
+            color: #4a9eff;
+        }
+        
+        .instructions ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin: 5px 0;
+            color: #ccc;
+        }
+        
+        .demo-text {
+            background: #333;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #000;
+        }
+        
+        @media (max-width: 768px) {
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-magic"></i> Enhanced Tools Test</h1>
+            <p>Test the new enhanced annotation tools with improved user experience</p>
+        </div>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3><i class="fas fa-eye"></i> Eraser Visual Aid</h3>
+                <p>Visual indicator shows exactly where the eraser will work, making precise erasing much easier.</p>
+                <span class="feature-status status-implemented">Implemented</span>
+                <div class="instructions">
+                    <h4>How to Test:</h4>
+                    <ul>
+                        <li>Select the eraser tool</li>
+                        <li>Move your mouse/finger around</li>
+                        <li>See the red circular indicator</li>
+                        <li>Draw some annotations first to test erasing</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <h3><i class="fas fa-paint-brush"></i> Smooth Highlighter</h3>
+                <p>Highlighter now draws smooth, continuous strokes like a real highlighter instead of circles.</p>
+                <span class="feature-status status-implemented">Implemented</span>
+                <div class="instructions">
+                    <h4>How to Test:</h4>
+                    <ul>
+                        <li>Select the highlighter tool</li>
+                        <li>Draw over text smoothly</li>
+                        <li>Notice the continuous stroke</li>
+                        <li>Uniform 30% opacity maintained</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <h3><i class="fas fa-sliders-h"></i> Pen Size Adjustment</h3>
+                <p>Adjust pen size by dragging on the pen button itself - no need to use the slider handle.</p>
+                <span class="feature-status status-implemented">Implemented</span>
+                <div class="instructions">
+                    <h4>How to Test:</h4>
+                    <ul>
+                        <li>Select the pen tool</li>
+                        <li>Click and drag on the pen button</li>
+                        <li>Drag up to increase size</li>
+                        <li>Drag down to decrease size</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <h3><i class="fas fa-trash-alt"></i> Clear All Hold</h3>
+                <p>Hold the clear button for 2 seconds to clear ALL annotations across all passages and tabs.</p>
+                <span class="feature-status status-implemented">Implemented</span>
+                <div class="instructions">
+                    <h4>How to Test:</h4>
+                    <ul>
+                        <li>Click clear button = clear current tab</li>
+                        <li>Hold clear button for 2 seconds</li>
+                        <li>Watch the red progress bar</li>
+                        <li>Red flash indicates all cleared</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-canvas-container">
+            <h3><i class="fas fa-flask"></i> Interactive Test Canvas</h3>
+            
+            <div class="demo-text">
+                <strong>Sample Text for Testing:</strong><br>
+                This is sample text that you can use to test the enhanced tools. Try highlighting this text with the smooth highlighter, drawing with the pen tool, and erasing with the visual aid. The eraser visual aid will show you exactly where you're erasing, making it much more accurate.
+            </div>
+            
+            <div class="tool-controls">
+                <button class="tool-btn active" data-tool="pen">
+                    <i class="fas fa-pen"></i> Pen
+                </button>
+                <button class="tool-btn" data-tool="highlight">
+                    <i class="fas fa-highlighter"></i> Highlight
+                </button>
+                <button class="tool-btn" data-tool="erase">
+                    <i class="fas fa-eraser"></i> Erase
+                </button>
+                <button class="tool-btn" id="clearBtn">
+                    <i class="fas fa-trash"></i> Clear
+                </button>
+            </div>
+            
+            <div class="color-picker" id="colorPicker">
+                <div class="color-option selected" style="background: #fefefe;" data-color="#fefefe"></div>
+                <div class="color-option" style="background: #ff3333;" data-color="#ff3333"></div>
+                <div class="color-option" style="background: #0090ff;" data-color="#0090ff"></div>
+                <div class="color-option" style="background: #00ff00;" data-color="#00ff00"></div>
+                <div class="color-option" style="background: #ffff00;" data-color="#ffff00"></div>
+                <div class="color-option" style="background: #ff00ff;" data-color="#ff00ff"></div>
+                <div class="color-option" style="background: #00ffff;" data-color="#00ffff"></div>
+                <div class="color-option" style="background: #000000;" data-color="#000000"></div>
+            </div>
+            
+            <div>
+                <label for="sizeSlider">Size: <span id="sizeValue">4</span>px</label>
+                <input type="range" id="sizeSlider" min="2" max="40" value="4" style="width: 100%; margin: 10px 0;">
+            </div>
+            
+            <div class="test-canvas">
+                <canvas id="testCanvas" width="800" height="300"></canvas>
+            </div>
+        </div>
+        
+        <div class="feature-card">
+            <h3><i class="fas fa-info-circle"></i> Test Instructions</h3>
+            <div class="instructions">
+                <h4>Complete Testing Workflow:</h4>
+                <ol>
+                    <li><strong>Pen Tool:</strong> Select pen, adjust size by dragging on pen button, draw on canvas</li>
+                    <li><strong>Highlighter:</strong> Select highlighter, draw over text to see smooth strokes</li>
+                    <li><strong>Eraser:</strong> Select eraser, notice the red visual aid, erase annotations</li>
+                    <li><strong>Clear All:</strong> Click to clear canvas, hold for 2 seconds to clear everything</li>
+                    <li><strong>Color Picker:</strong> Click pen/highlighter twice to open advanced color picker</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    
+    <script src="enhanced-tools.js"></script>
+    <script>
+        // Test canvas implementation
+        const canvas = document.getElementById('testCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let currentTool = 'pen';
+        let currentColor = '#fefefe';
+        let currentSize = 4;
+        
+        // Tool buttons
+        document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tool-btn[data-tool]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentTool = btn.dataset.tool;
+                
+                // Update enhanced tools current tool
+                if (window.enhancedTools) {
+                    window.enhancedTools.selectTool(currentTool);
+                }
+            });
+        });
+        
+        // Color picker
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                currentColor = option.dataset.color;
+                
+                // Update enhanced tools color
+                if (window.enhancedTools) {
+                    window.enhancedTools.setColor(currentColor);
+                }
+            });
+        });
+        
+        // Size slider
+        const sizeSlider = document.getElementById('sizeSlider');
+        const sizeValue = document.getElementById('sizeValue');
+        sizeSlider.addEventListener('input', (e) => {
+            currentSize = parseInt(e.target.value);
+            sizeValue.textContent = currentSize;
+            
+            // Update enhanced tools size
+            if (window.enhancedTools) {
+                window.enhancedTools.toolSettings.pen.size = currentSize;
+            }
+        });
+        
+        // Drawing functions
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        
+        // Touch events
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+        
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);
+        }
+        
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            
+            if (!clientX || !clientY) return;
+            
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+            
+            ctx.lineWidth = currentSize;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            if (currentTool === 'pen') {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.globalAlpha = 1.0;
+                ctx.strokeStyle = currentColor;
+            } else if (currentTool === 'highlight') {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.globalAlpha = 0.3;
+                ctx.strokeStyle = currentColor;
+            } else if (currentTool === 'erase') {
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.globalAlpha = 1.0;
+                ctx.strokeStyle = '#000';
+            }
+            
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            
+            e.preventDefault();
+        }
+        
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+        
+        // Clear button
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+        
+        // Initialize canvas
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = currentColor;
+        ctx.lineWidth = currentSize;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        // Initialize enhanced tools for this test page
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.enhancedTools) {
+                // Override the startDrawing method for this test page
+                const originalStartDrawing = window.enhancedTools.startDrawing;
+                window.enhancedTools.startDrawing = function(e, canvas, tabId) {
+                    // For test page, let the test page handle drawing
+                    return false;
+                };
+            }
+        });
+    </script>
+</body>
+</html> 

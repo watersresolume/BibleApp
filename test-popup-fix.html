@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Popup Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .test-word {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 5px;
+            background: rgba(74, 158, 255, 0.2);
+            border: 1px solid #4a9eff;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .test-word:hover {
+            background: rgba(74, 158, 255, 0.3);
+        }
+        
+        .word-info-popup {
+            position: fixed;
+            min-width: 300px;
+            max-width: 350px;
+            background: rgba(30, 30, 30, 0.98);
+            backdrop-filter: blur(15px);
+            border: 2px solid #4a9eff;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), 0 0 20px rgba(74, 158, 255, 0.3);
+            z-index: 10100;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            opacity: 0;
+            transform: scale(0.8) translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: move;
+            user-select: none;
+            will-change: transform, left, top;
+        }
+        
+        .word-info-popup.show {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+        
+        .word-info-popup.dragging {
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.8), 0 0 25px rgba(74, 158, 255, 0.5);
+            transform: scale(1.02);
+            transition: none !important;
+            transform-origin: center;
+        }
+        
+        .word-info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, rgba(74, 158, 255, 0.1), rgba(74, 158, 255, 0.05));
+            border-bottom: 1px solid rgba(74, 158, 255, 0.3);
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .word-info-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #4a9eff;
+            margin: 0;
+            word-break: break-word;
+        }
+        
+        .word-info-close {
+            background: none;
+            border: none;
+            color: #e0e0e0;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+        }
+        
+        .word-info-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ff6b6b;
+            transform: rotate(90deg);
+        }
+        
+        .word-info-content {
+            padding: 20px;
+        }
+        
+        .word-info-section {
+            margin-bottom: 18px;
+        }
+        
+        .word-info-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .word-info-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            display: block;
+        }
+        
+        .word-info-value {
+            font-size: 15px;
+            color: #e0e0e0;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        
+        .test-instructions {
+            background: rgba(74, 158, 255, 0.1);
+            border: 1px solid #4a9eff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .test-status {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Popup Fix Test</h1>
+        
+        <div class="test-instructions">
+            <h3>Test Instructions:</h3>
+            <ul>
+                <li>Click on any word below to open a popup</li>
+                <li>Verify the popup appears near the clicked word (not in upper right)</li>
+                <li>Try dragging the popup from anywhere on it (not just the header)</li>
+                <li>Verify dragging is smooth and responsive</li>
+                <li>Test that popups stay within viewport boundaries</li>
+            </ul>
+        </div>
+        
+        <div class="test-status" id="status">
+            <strong>Status:</strong> Ready to test
+        </div>
+        
+        <div class="test-content">
+            <p>
+                Click on any of these words to test popup functionality:
+                <span class="test-word" data-word="grace">grace</span>
+                <span class="test-word" data-word="love">love</span>
+                <span class="test-word" data-word="faith">faith</span>
+                <span class="test-word" data-word="hope">hope</span>
+                <span class="test-word" data-word="peace">peace</span>
+                <span class="test-word" data-word="joy">joy</span>
+                <span class="test-word" data-word="mercy">mercy</span>
+                <span class="test-word" data-word="truth">truth</span>
+            </p>
+            
+            <p>
+                More test words:
+                <span class="test-word" data-word="wisdom">wisdom</span>
+                <span class="test-word" data-word="knowledge">knowledge</span>
+                <span class="test-word" data-word="understanding">understanding</span>
+                <span class="test-word" data-word="patience">patience</span>
+                <span class="test-word" data-word="kindness">kindness</span>
+                <span class="test-word" data-word="goodness">goodness</span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let activePopups = [];
+        
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML = `<strong>Status:</strong> ${message}`;
+        }
+        
+        function getWordInfo(word) {
+            // Mock word data for testing
+            return {
+                word: word,
+                greek: {
+                    text: "χάρις",
+                    transliteration: "charis",
+                    meaning: "grace, favor, kindness"
+                },
+                hebrew: {
+                    text: "חֵן",
+                    transliteration: "chen",
+                    meaning: "grace, favor, beauty"
+                },
+                frequency: Math.floor(Math.random() * 100) + 1
+            };
+        }
+        
+        function showWordPopup(wordInfo, event) {
+            updateStatus(`Opening popup for: ${wordInfo.word}`);
+            
+            // Check if popup already exists
+            const existingPopup = activePopups.find(popup => 
+                popup.querySelector('.word-info-title').textContent === wordInfo.word
+            );
+            
+            if (existingPopup) {
+                existingPopup.style.zIndex = Math.max(...activePopups.map(p => parseInt(p.style.zIndex) || 10100)) + 1;
+                updateStatus(`Popup already exists for: ${wordInfo.word}`);
+                return;
+            }
+            
+            // Create popup element
+            const popup = document.createElement('div');
+            popup.className = 'word-info-popup';
+            
+            popup.innerHTML = `
+                <div class="word-info-header">
+                    <h3 class="word-info-title">${wordInfo.word}</h3>
+                    <button class="word-info-close" aria-label="Close">&times;</button>
+                </div>
+                <div class="word-info-content">
+                    <div class="word-info-section">
+                        <span class="word-info-label">Greek</span>
+                        <div class="word-info-value greek">
+                            <strong>${wordInfo.greek.text}</strong><br>
+                            <em>${wordInfo.greek.transliteration}</em><br>
+                            ${wordInfo.greek.meaning}
+                        </div>
+                    </div>
+                    <div class="word-info-section">
+                        <span class="word-info-label">Hebrew</span>
+                        <div class="word-info-value hebrew">
+                            <strong>${wordInfo.hebrew.text}</strong><br>
+                            <em>${wordInfo.hebrew.transliteration}</em><br>
+                            ${wordInfo.hebrew.meaning}
+                        </div>
+                    </div>
+                    <div class="word-info-section">
+                        <span class="word-info-label">Frequency</span>
+                        <div class="word-info-value frequency">
+                            Used ${wordInfo.frequency} times in the Bible
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Calculate initial position relative to the word span
+            const wordSpan = event.target;
+            const wordRect = wordSpan.getBoundingClientRect();
+            const popupOffset = activePopups.length * 20;
+            
+            // Position popup using fixed positioning
+            popup.style.position = 'fixed';
+            popup.style.left = `${wordRect.left + popupOffset}px`;
+            popup.style.top = `${wordRect.bottom + 6 + popupOffset}px`;
+            popup.style.zIndex = 10100 + activePopups.length;
+            
+            // Insert popup into body
+            document.body.appendChild(popup);
+            activePopups.push(popup);
+            
+            // Show popup with animation
+            setTimeout(() => {
+                popup.classList.add('show');
+            }, 10);
+            
+            // Add close button event listener
+            const closeBtn = popup.querySelector('.word-info-close');
+            closeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                closePopup(popup);
+            });
+            
+            // Make popup draggable
+            makePopupDraggable(popup);
+            
+            // Ensure popup stays within viewport
+            adjustPopupPosition(popup);
+            
+            updateStatus(`Popup opened for: ${wordInfo.word}`);
+        }
+        
+        function closePopup(popup) {
+            const index = activePopups.indexOf(popup);
+            if (index > -1) {
+                activePopups.splice(index, 1);
+            }
+            
+            popup.classList.remove('show');
+            
+            setTimeout(() => {
+                if (popup && popup.parentNode) {
+                    popup.parentNode.removeChild(popup);
+                }
+            }, 300);
+            
+            updateStatus(`Popup closed. Remaining: ${activePopups.length}`);
+        }
+        
+        function makePopupDraggable(popup) {
+            let isDragging = false;
+            let offsetX = 0;
+            let offsetY = 0;
+            
+            function startDrag(e) {
+                if (e.target.classList.contains('word-info-close')) {
+                    return;
+                }
+                
+                e.preventDefault();
+                e.stopPropagation();
+                
+                isDragging = true;
+                
+                const rect = popup.getBoundingClientRect();
+                let clientX, clientY;
+                
+                if (e.type === "touchstart") {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+                
+                offsetX = clientX - rect.left;
+                offsetY = clientY - rect.top;
+                
+                popup.classList.add('dragging');
+                popup.style.zIndex = Math.max(...activePopups.map(p => parseInt(p.style.zIndex) || 10100)) + 1;
+                
+                document.addEventListener('mousemove', handleMove, { passive: false });
+                document.addEventListener('touchmove', handleMove, { passive: false });
+                document.addEventListener('mouseup', endDrag, { passive: true });
+                document.addEventListener('touchend', endDrag, { passive: true });
+                document.addEventListener('mouseleave', endDrag, { passive: true });
+            }
+            
+            function handleMove(e) {
+                if (!isDragging) return;
+                
+                e.preventDefault();
+                
+                let clientX, clientY;
+                if (e.type === "touchmove") {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+                
+                const newX = clientX - offsetX;
+                const newY = clientY - offsetY;
+                
+                popup.style.left = `${newX}px`;
+                popup.style.top = `${newY}px`;
+            }
+            
+            function endDrag(e) {
+                if (!isDragging) return;
+                
+                isDragging = false;
+                popup.classList.remove('dragging');
+                
+                document.removeEventListener('mousemove', handleMove);
+                document.removeEventListener('touchmove', handleMove);
+                document.removeEventListener('mouseup', endDrag);
+                document.removeEventListener('touchend', endDrag);
+                document.removeEventListener('mouseleave', endDrag);
+                
+                adjustPopupPosition(popup);
+                updateStatus(`Popup dragged to new position`);
+            }
+            
+            popup.addEventListener('mousedown', startDrag, { passive: false });
+            popup.addEventListener('touchstart', startDrag, { passive: false });
+        }
+        
+        function adjustPopupPosition(popup) {
+            const rect = popup.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            
+            let needsAdjustment = false;
+            let newLeft = parseInt(popup.style.left) || 0;
+            let newTop = parseInt(popup.style.top) || 0;
+            
+            if (rect.left < 10) {
+                newLeft = 10;
+                needsAdjustment = true;
+            } else if (rect.right > viewportWidth - 10) {
+                newLeft = viewportWidth - rect.width - 10;
+                needsAdjustment = true;
+            }
+            
+            if (rect.top < 10) {
+                newTop = 10;
+                needsAdjustment = true;
+            } else if (rect.bottom > viewportHeight - 10) {
+                newTop = viewportHeight - rect.height - 10;
+                needsAdjustment = true;
+            }
+            
+            if (needsAdjustment) {
+                popup.style.left = `${newLeft}px`;
+                popup.style.top = `${newTop}px`;
+                updateStatus(`Popup position adjusted to stay in viewport`);
+            }
+        }
+        
+        // Add click listeners to test words
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.test-word').forEach(wordEl => {
+                wordEl.addEventListener('click', (event) => {
+                    const word = wordEl.getAttribute('data-word');
+                    const wordInfo = getWordInfo(word);
+                    showWordPopup(wordInfo, event);
+                });
+            });
+            
+            updateStatus('Test page loaded. Click on words to test popups.');
+        });
+    </script>
+</body>
+</html> 

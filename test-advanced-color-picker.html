@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Color Picker Test</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="enhanced-tools.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #3a3a3a;
+        }
+        .color-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            margin: 10px 0;
+        }
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .test-btn {
+            padding: 10px 20px;
+            background: #4a9eff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-btn:hover {
+            background: #3a8eef;
+        }
+        .status {
+            padding: 10px;
+            background: #333;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Advanced Color Picker Test</h1>
+        
+        <div class="test-section">
+            <h2>Simple Color Dropdown Test</h2>
+            <div class="tool-wrapper">
+                <button class="tool-icon selected" data-tool="pen" id="penToolBtn"><i class="fas fa-pen"></i></button>
+                <div class="pen-color-dropdown" id="penColorDropdown">
+                    <button class="pen-color-option" style="--pen-color: #fefefe;" data-color="#fefefe" title="White">&nbsp;</button>
+                    <button class="pen-color-option" style="--pen-color: #ff3333;" data-color="#ff3333" title="Red">&nbsp;</button>
+                    <button class="pen-color-option" style="--pen-color: #0090ff;" data-color="#0090ff" title="Blue">&nbsp;</button>
+                    <button class="pen-color-option" style="--pen-color: #00ff00;" data-color="#00ff00" title="Green">&nbsp;</button>
+                    <button class="pen-color-option" style="--pen-color: #ffff00;" data-color="#ffff00" title="Yellow">&nbsp;</button>
+                    <div class="advanced-arrow" data-tool="pen">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="togglePenDropdown()">Toggle Pen Dropdown</button>
+                <button class="test-btn" onclick="testAdvancedPicker()">Test Advanced Picker</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Color Preview</h2>
+            <div class="color-preview" id="colorPreview"></div>
+            <div class="status" id="status">Status: Ready</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Debug Info</h2>
+            <div id="debugInfo"></div>
+        </div>
+    </div>
+    
+    <script src="enhanced-tools.js"></script>
+    <script>
+        let enhancedTools;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                enhancedTools = new EnhancedTools();
+                console.log('Enhanced Tools initialized for test');
+                updateDebugInfo();
+            }, 100);
+        });
+        
+        function togglePenDropdown() {
+            const dropdown = document.getElementById('penColorDropdown');
+            dropdown.classList.toggle('show');
+            updateStatus('Pen dropdown toggled');
+        }
+        
+        function testAdvancedPicker() {
+            if (enhancedTools) {
+                enhancedTools.toggleAdvancedColorPicker('pen');
+                updateStatus('Advanced picker toggled for pen tool');
+            } else {
+                updateStatus('Enhanced tools not initialized');
+            }
+        }
+        
+        function updateStatus(message) {
+            document.getElementById('status').textContent = 'Status: ' + message;
+            updateDebugInfo();
+        }
+        
+        function updateDebugInfo() {
+            const debugDiv = document.getElementById('debugInfo');
+            if (enhancedTools) {
+                debugDiv.innerHTML = `
+                    <p><strong>Enhanced Tools:</strong> Initialized</p>
+                    <p><strong>Current Tool:</strong> ${enhancedTools.currentTool}</p>
+                    <p><strong>Advanced Tool:</strong> ${enhancedTools.currentAdvancedTool || 'None'}</p>
+                    <p><strong>Advanced Picker Open:</strong> ${enhancedTools.advancedPickerOpen}</p>
+                    <p><strong>Pen Color:</strong> ${enhancedTools.toolSettings.pen.color}</p>
+                    <p><strong>Highlighter Color:</strong> ${enhancedTools.toolSettings.highlight.color}</p>
+                    <p><strong>Window Pen Color:</strong> ${window.penColor || 'Not set'}</p>
+                    <p><strong>Window Highlighter Color:</strong> ${window.highlighterColor || 'Not set'}</p>
+                `;
+            } else {
+                debugDiv.innerHTML = '<p><strong>Enhanced Tools:</strong> Not initialized</p>';
+            }
+        }
+        
+        // Update color preview when colors change
+        function updateColorPreview() {
+            const preview = document.getElementById('colorPreview');
+            const currentColor = enhancedTools ? enhancedTools.toolSettings.pen.color : '#ffff00';
+            preview.style.background = currentColor;
+        }
+        
+        // Monitor for color changes
+        setInterval(() => {
+            updateColorPreview();
+            updateDebugInfo();
+        }, 500);
+        
+        // Initial color preview
+        setTimeout(updateColorPreview, 200);
+    </script>
+</body>
+</html> 

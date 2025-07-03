@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drawing Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .test-container {
+            border: 1px solid #ccc;
+            height: 400px;
+            overflow-y: auto;
+            position: relative;
+            margin: 20px 0;
+        }
+        .test-content {
+            padding: 20px;
+            height: 800px;
+            background: linear-gradient(to bottom, #f0f0f0, #e0e0e0);
+        }
+        .test-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: auto;
+            cursor: crosshair;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            margin: 5px;
+            padding: 10px;
+        }
+        .debug-info {
+            background: #f5f5f5;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Drawing Fix Test</h1>
+    
+    <div class="controls">
+        <button onclick="setTool('pen')">Pen</button>
+        <button onclick="setTool('highlight')">Highlight</button>
+        <button onclick="setTool('erase')">Eraser</button>
+        <button onclick="clearCanvas()">Clear</button>
+        <button onclick="showDebugInfo()">Show Debug Info</button>
+    </div>
+    
+    <div class="debug-info" id="debugInfo">
+        Debug info will appear here...
+    </div>
+    
+    <div class="test-container" id="testContainer">
+        <div class="test-content">
+            <h2>Test Content</h2>
+            <p>This is a test to verify drawing functionality. Scroll down to test drawing at different positions.</p>
+            <p>Line 1: Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            <p>Line 2: Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <p>Line 3: Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
+            <p>Line 4: Laboris nisi ut aliquip ex ea commodo consequat.</p>
+            <p>Line 5: Duis aute irure dolor in reprehenderit in voluptate.</p>
+            <p>Line 6: Velit esse cillum dolore eu fugiat nulla pariatur.</p>
+            <p>Line 7: Excepteur sint occaecat cupidatat non proident.</p>
+            <p>Line 8: Sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            <p>Line 9: Sed ut perspiciatis unde omnis iste natus error sit.</p>
+            <p>Line 10: Voluptatem accusantium doloremque laudantium.</p>
+            <p>Line 11: Totam rem aperiam, eaque ipsa quae ab illo inventore.</p>
+            <p>Line 12: Veritatis et quasi architecto beatae vitae dicta sunt.</p>
+            <p>Line 13: Explicabo nemo enim ipsam voluptatem quia voluptas.</p>
+            <p>Line 14: Sit aspernatur aut odit aut fugit, sed quia consequuntur.</p>
+            <p>Line 15: Magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
+            <p>Line 16: Neque porro quisquam est, qui dolorem ipsum quia dolor.</p>
+            <p>Line 17: Sit amet, consectetur, adipisci velit, sed quia non numquam.</p>
+            <p>Line 18: Eius modi tempora incidunt ut labore et dolore magnam.</p>
+            <p>Line 19: Aliquam quaerat voluptatem ut enim ad minima veniam.</p>
+            <p>Line 20: Quis nostrum exercitationem ullam corporis suscipit.</p>
+            <p>Line 21: Laboriosam nisi ut aliquid ex ea commodi consequatur.</p>
+            <p>Line 22: Quis autem vel eum iure reprehenderit qui in ea voluptate.</p>
+            <p>Line 23: Velit esse quam nihil molestiae consequatur.</p>
+            <p>Line 24: Vel illum qui dolorem eum fugiat quo voluptas nulla pariatur.</p>
+            <p>Line 25: This is the last line - try drawing here!</p>
+        </div>
+        <canvas class="test-canvas" id="testCanvas"></canvas>
+    </div>
+
+    <script>
+        let currentTool = 'pen';
+        let isDrawing = false;
+        let lastPoint = null;
+        let dpr = window.devicePixelRatio || 1;
+        
+        const container = document.getElementById('testContainer');
+        const canvas = document.getElementById('testCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set up canvas
+        function setupCanvas() {
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            ctx.scale(dpr, dpr);
+            console.log('Canvas setup:', { width: canvas.width, height: canvas.height, dpr });
+        }
+        
+        // Get pointer position relative to canvas
+        function getPointerPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            let x, y;
+            
+            if (e.touches && e.touches.length > 0) {
+                x = e.touches[0].clientX - rect.left;
+                y = e.touches[0].clientY - rect.top;
+            } else {
+                x = e.clientX - rect.left;
+                y = e.clientY - rect.top;
+            }
+            
+            // Add scroll offset
+            y += container.scrollTop;
+            
+            return { x, y };
+        }
+        
+        // Drawing functions
+        function startDrawing(e) {
+            isDrawing = true;
+            lastPoint = getPointerPos(e);
+            console.log('Start drawing:', lastPoint);
+            e.preventDefault();
+        }
+        
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            const point = getPointerPos(e);
+            console.log('Drawing:', point);
+            
+            ctx.save();
+            
+            if (currentTool === 'pen') {
+                ctx.strokeStyle = '#ff0000';
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+            } else if (currentTool === 'highlight') {
+                ctx.strokeStyle = '#ffff00';
+                ctx.lineWidth = 10;
+                ctx.globalAlpha = 0.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+            } else if (currentTool === 'erase') {
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 10;
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+            }
+            
+            ctx.beginPath();
+            ctx.moveTo(lastPoint.x, lastPoint.y);
+            ctx.lineTo(point.x, point.y);
+            ctx.stroke();
+            ctx.restore();
+            
+            lastPoint = point;
+            e.preventDefault();
+        }
+        
+        function endDrawing() {
+            isDrawing = false;
+            console.log('End drawing');
+        }
+        
+        // Event listeners
+        canvas.addEventListener('pointerdown', startDrawing);
+        canvas.addEventListener('pointermove', draw);
+        canvas.addEventListener('pointerup', endDrawing);
+        canvas.addEventListener('pointerleave', endDrawing);
+        
+        // Control functions
+        function setTool(tool) {
+            currentTool = tool;
+            console.log('Tool set to:', tool);
+        }
+        
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            console.log('Canvas cleared');
+        }
+        
+        function showDebugInfo() {
+            const info = {
+                canvasSize: { width: canvas.width, height: canvas.height },
+                containerSize: { width: container.offsetWidth, height: container.offsetHeight },
+                scrollTop: container.scrollTop,
+                scrollHeight: container.scrollHeight,
+                dpr: dpr,
+                currentTool: currentTool,
+                isDrawing: isDrawing
+            };
+            document.getElementById('debugInfo').textContent = JSON.stringify(info, null, 2);
+        }
+        
+        // Initialize
+        setupCanvas();
+        window.addEventListener('resize', setupCanvas);
+        
+        console.log('Drawing test initialized');
+    </script>
+</body>
+</html> 

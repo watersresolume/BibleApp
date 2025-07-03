@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NLT Repository Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .repository {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .repo-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .repo-description {
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+        .repo-link {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 5px;
+        }
+        .repo-link:hover {
+            background: #0056b3;
+        }
+        .search-section {
+            background: #e9ecef;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .search-term {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #007bff;
+        }
+        .priority {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        .secondary {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 NLT Repository Checker</h1>
+    
+    <div class="search-section">
+        <h2>📋 Search Terms to Use on GitHub</h2>
+        <p>Copy and paste these exact search terms into GitHub search:</p>
+        
+        <div class="search-term priority">
+            <strong>Primary Search (Most Likely):</strong><br>
+            <code>NLT bible JSON</code>
+            <button onclick="copyToClipboard('NLT bible JSON')" class="repo-link">Copy</button>
+        </div>
+        
+        <div class="search-term priority">
+            <strong>Alternative Search:</strong><br>
+            <code>bible data NLT</code>
+            <button onclick="copyToClipboard('bible data NLT')" class="repo-link">Copy</button>
+        </div>
+        
+        <div class="search-term secondary">
+            <strong>Broader Search:</strong><br>
+            <code>scripture NLT</code>
+            <button onclick="copyToClipboard('scripture NLT')" class="repo-link">Copy</button>
+        </div>
+        
+        <div class="search-term secondary">
+            <strong>Full Name Search:</strong><br>
+            <code>new living translation JSON</code>
+            <button onclick="copyToClipboard('new living translation JSON')" class="repo-link">Copy</button>
+        </div>
+    </div>
+
+    <h2>🎯 Known Repositories to Check</h2>
+    
+    <div class="repository">
+        <div class="repo-title">scrollmapper/bible_databases</div>
+        <div class="repo-description">
+            Large collection of Bible databases in various formats. This is one of the most comprehensive Bible data repositories on GitHub.
+        </div>
+        <a href="https://github.com/scrollmapper/bible_databases" target="_blank" class="repo-link">View Repository</a>
+        <a href="https://github.com/scrollmapper/bible_databases/search?q=NLT" target="_blank" class="repo-link">Search for NLT</a>
+    </div>
+
+    <div class="repository">
+        <div class="repo-title">bibleapi/bibleapi-bibles-json</div>
+        <div class="repo-description">
+            Bible API project with multiple translations. Likely to have NLT data in JSON format.
+        </div>
+        <a href="https://github.com/bibleapi/bibleapi-bibles-json" target="_blank" class="repo-link">View Repository</a>
+        <a href="https://github.com/bibleapi/bibleapi-bibles-json/search?q=NLT" target="_blank" class="repo-link">Search for NLT</a>
+    </div>
+
+    <div class="repository">
+        <div class="repo-title">scrollmapper/bible_versions</div>
+        <div class="repo-description">
+            Bible versions repository with multiple translations. Check for NLT in various formats.
+        </div>
+        <a href="https://github.com/scrollmapper/bible_versions" target="_blank" class="repo-link">View Repository</a>
+        <a href="https://github.com/scrollmapper/bible_versions/search?q=NLT" target="_blank" class="repo-link">Search for NLT</a>
+    </div>
+
+    <div class="repository">
+        <div class="repo-title">openbibleinfo/Bible-Data</div>
+        <div class="repo-description">
+            Open Bible Info project with various Bible datasets. May include NLT data.
+        </div>
+        <a href="https://github.com/openbibleinfo/Bible-Data" target="_blank" class="repo-link">View Repository</a>
+        <a href="https://github.com/openbibleinfo/Bible-Data/search?q=NLT" target="_blank" class="repo-link">Search for NLT</a>
+    </div>
+
+    <div class="repository">
+        <div class="repo-title">JohnRDOrazio/LiturgicalCalendar</div>
+        <div class="repo-description">
+            Liturgical calendar project that may include Bible data as part of larger project.
+        </div>
+        <a href="https://github.com/JohnRDOrazio/LiturgicalCalendar" target="_blank" class="repo-link">View Repository</a>
+        <a href="https://github.com/JohnRDOrazio/LiturgicalCalendar/search?q=NLT" target="_blank" class="repo-link">Search for NLT</a>
+    </div>
+
+    <div class="search-section">
+        <h2>🚀 Quick Action Plan</h2>
+        <ol>
+            <li><strong>Start with GitHub search:</strong> Use "NLT bible JSON" first</li>
+            <li><strong>Check repositories above:</strong> Click the "Search for NLT" links</li>
+            <li><strong>Look for files named:</strong> nlt.json, NLT.json, bible-nlt.json</li>
+            <li><strong>Download JSON files:</strong> Raw format is best</li>
+            <li><strong>Check file size:</strong> Should be 1-5MB for complete Bible</li>
+        </ol>
+    </div>
+
+    <div class="search-section">
+        <h2>📞 Found Something? Need Help?</h2>
+        <p>If you find a repository with NLT data but need help converting it:</p>
+        <ul>
+            <li>Share the repository URL</li>
+            <li>Describe the file format you found</li>
+            <li>I'll help you convert it to the right format for your app</li>
+        </ul>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('Search term copied to clipboard: ' + text);
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+    </script>
+</body>
+</html> 

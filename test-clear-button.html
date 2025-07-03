@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Button Test</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .test-info {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #404040;
+        }
+        .test-info h2 {
+            color: #4a9eff;
+            margin-top: 0;
+        }
+        .test-info ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .test-info li {
+            margin: 5px 0;
+        }
+        .highlight {
+            background: #4a9eff;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h2>Clear Button Test</h2>
+        <p>This page tests the enhanced clear button functionality:</p>
+        <ul>
+            <li><span class="highlight">Quick tap</span>: Clears annotations for current tab only</li>
+            <li><span class="highlight">Hold for 1.5 seconds</span>: Clears ALL annotations across the entire app</li>
+            <li><span class="highlight">Visual feedback</span>: Progress indicator and color changes during hold</li>
+            <li><span class="highlight">Undo support</span>: Both clear operations can be undone</li>
+        </ul>
+        <p><strong>Instructions:</strong></p>
+        <ol>
+            <li>Create some annotations using the pen or highlighter tools</li>
+            <li>Try a quick tap on the clear button - should clear only current tab</li>
+            <li>Create more annotations, then hold the clear button for 1.5 seconds</li>
+            <li>Watch for the progress indicator and color changes</li>
+            <li>Test the undo button to restore cleared annotations</li>
+        </ol>
+    </div>
+
+    <div id="app">
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <div class="tool-wrapper">
+                    <button class="tool-icon" id="penToolBtn" data-tool="pen" title="Pen Tool">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <button class="tool-icon" id="highlightToolBtn" data-tool="highlight" title="Highlighter">
+                        <i class="fas fa-highlighter"></i>
+                    </button>
+                    <button class="tool-icon" data-tool="erase" title="Eraser">
+                        <i class="fas fa-eraser"></i>
+                    </button>
+                </div>
+                
+                <div class="color-dropdown-wrapper">
+                    <div class="dropdown" id="penColorDropdown">
+                        <div class="color-presets">
+                            <button class="color-swatch preset pen-color-option" data-color="#ffff00" style="background: #ffff00;"></button>
+                            <button class="color-swatch preset pen-color-option" data-color="#ff0000" style="background: #ff0000;"></button>
+                            <button class="color-swatch preset pen-color-option" data-color="#00ff00" style="background: #00ff00;"></button>
+                            <button class="color-swatch preset pen-color-option" data-color="#0000ff" style="background: #0000ff;"></button>
+                            <button class="color-swatch preset pen-color-option" data-color="#ff00ff" style="background: #ff00ff;"></button>
+                            <button class="color-swatch preset pen-color-option" data-color="#00ffff" style="background: #00ffff;"></button>
+                        </div>
+                    </div>
+                    
+                    <div class="dropdown" id="highlighterColorDropdown">
+                        <div class="color-presets">
+                            <button class="color-swatch preset highlighter-color-option" data-color="#ffff00" style="background: #ffff00;"></button>
+                            <button class="color-swatch preset highlighter-color-option" data-color="#ff0000" style="background: #ff0000;"></button>
+                            <button class="color-swatch preset highlighter-color-option" data-color="#00ff00" style="background: #00ff00;"></button>
+                            <button class="color-swatch preset highlighter-color-option" data-color="#0000ff" style="background: #0000ff;"></button>
+                            <button class="color-swatch preset highlighter-color-option" data-color="#ff00ff" style="background: #ff00ff;"></button>
+                            <button class="color-swatch preset highlighter-color-option" data-color="#00ffff" style="background: #00ffff;"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="toolbar-right">
+                <button class="toolbar-btn" id="undoBtn" title="Undo (Ctrl+Z)" data-shortcut="Ctrl+Z">↶</button>
+                <button class="toolbar-btn" id="redoBtn" title="Redo (Ctrl+Y)" data-shortcut="Ctrl+Y">↷</button>
+                <button class="toolbar-btn" id="resetBtn" title="Clear All (Hold 1.5s for app-wide clear)" tabindex="-1">🗑️</button>
+            </div>
+        </div>
+
+        <div class="browser-tabs">
+            <div class="tab-bar">
+                <button class="new-tab-btn" id="newTabBtn">+</button>
+            </div>
+            <div class="tab-content">
+                <!-- Tab content will be generated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+</html> 

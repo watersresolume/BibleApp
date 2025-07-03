@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Load Tabs Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+        }
+        .test-section {
+            background: #2a2a2a;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .test-step {
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .expected-result {
+            background: #1a3a1a;
+            border: 1px solid #4a4;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #3a1a1a;
+            border: 1px solid #a44;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        button {
+            background: #4a9eff;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            color: white;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #3a8eff;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.success {
+            background: #1a3a1a;
+            border: 1px solid #4a4;
+        }
+        .status.error {
+            background: #3a1a1a;
+            border: 1px solid #a44;
+        }
+        .highlight {
+            background: #4a4a1a;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Auto-Load Tabs Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Scenario: Automatic Tab Loading</h2>
+        
+        <div class="highlight">
+            <h3>🎯 Primary Goal</h3>
+            <p>Verify that when a tab is closed, the app automatically switches to another tab and loads its content without requiring manual user interaction.</p>
+        </div>
+        
+        <div class="test-step">
+            <h3>Step 1: Open the Bible App</h3>
+            <p>Navigate to the main Bible app and ensure it's loaded properly.</p>
+            <button onclick="openBibleApp()">Open Bible App</button>
+        </div>
+        
+        <div class="test-step">
+            <h3>Step 2: Load Multiple Tabs</h3>
+            <p>1. In the first tab, load Genesis 1:1 (ESV)</p>
+            <p>2. Create a second tab and load John 3:16 (NIV)</p>
+            <p>3. Create a third tab and load Psalm 23:1-6 (KJV)</p>
+            <p>4. Verify all three tabs have loaded content</p>
+        </div>
+        
+        <div class="test-step">
+            <h3>Step 3: Test Tab Closing - Middle Tab</h3>
+            <p>1. Make sure you're on the middle tab (John 3:16)</p>
+            <p>2. Close the middle tab by clicking the "×" button</p>
+            <p>3. <strong>EXPECTED:</strong> App should automatically switch to the next tab (Psalm 23)</p>
+            <p>4. <strong>EXPECTED:</strong> The Psalm 23 content should load automatically without clicking the load button</p>
+        </div>
+        
+        <div class="test-step">
+            <h3>Step 4: Test Tab Closing - Last Tab</h3>
+            <p>1. Now you should be on the last remaining tab (Psalm 23)</p>
+            <p>2. Close this tab by clicking the "×" button</p>
+            <p>3. <strong>EXPECTED:</strong> App should automatically switch to the first tab (Genesis 1:1)</p>
+            <p>4. <strong>EXPECTED:</strong> The Genesis 1:1 content should load automatically</p>
+        </div>
+        
+        <div class="test-step">
+            <h3>Step 5: Test Tab Closing - First Tab</h3>
+            <p>1. Create a new tab and load any passage</p>
+            <p>2. Switch back to the first tab (Genesis 1:1)</p>
+            <p>3. Close the first tab</p>
+            <p>4. <strong>EXPECTED:</strong> App should automatically switch to the remaining tab</p>
+            <p>5. <strong>EXPECTED:</strong> The remaining tab's content should load automatically</p>
+        </div>
+        
+        <div class="test-step">
+            <h3>Step 6: Test Tab Switching</h3>
+            <p>1. Create multiple tabs with loaded content</p>
+            <p>2. Switch between tabs by clicking on them</p>
+            <p>3. <strong>EXPECTED:</strong> Each tab should show its content immediately when clicked</p>
+            <p>4. <strong>EXPECTED:</strong> No manual loading should be required</p>
+        </div>
+        
+        <div class="test-step">
+            <h3>Step 7: Test Empty Tabs</h3>
+            <p>1. Create a new tab (don't load any content)</p>
+            <p>2. Close a loaded tab</p>
+            <p>3. <strong>EXPECTED:</strong> App should switch to a loaded tab, not the empty one</p>
+            <p>4. <strong>EXPECTED:</strong> The loaded tab's content should appear automatically</p>
+        </div>
+    </div>
+    
+    <div class="expected-result">
+        <h3>✅ Expected Results:</h3>
+        <ul>
+            <li>When closing a tab, the app automatically switches to the most logical next tab</li>
+            <li>Previously loaded tabs automatically display their content without manual loading</li>
+            <li>Tab switching is smooth and immediate</li>
+            <li>The app prioritizes loaded tabs over empty tabs when switching</li>
+            <li>No manual clicking of the load button is required for previously loaded content</li>
+        </ul>
+    </div>
+    
+    <div class="warning">
+        <h3>⚠️ Important Notes:</h3>
+        <ul>
+            <li>Only tabs that were previously loaded will auto-load their content</li>
+            <li>Empty tabs (no passage selected) will not auto-load anything</li>
+            <li>The app intelligently chooses the next tab based on the position of the closed tab</li>
+            <li>If you close the last tab, it switches to the previous tab</li>
+            <li>If you close a middle tab, it stays at the same position</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>Technical Details</h2>
+        <p><strong>Tab Selection Logic:</strong> When closing a tab, the app determines the next tab based on the closed tab's position</p>
+        <p><strong>Auto-Loading:</strong> Tabs with <code>loaded: true</code> and complete passage info automatically reload their content</p>
+        <p><strong>Content Restoration:</strong> Tabs with saved content restore immediately, others reload from the API</p>
+        <p><strong>Fallback:</strong> If no tabs remain, a new empty tab is created</p>
+    </div>
+    
+    <div id="status"></div>
+    
+    <script>
+        function openBibleApp() {
+            window.open('index.html', '_blank');
+        }
+        
+        function showStatus(message, type = 'success') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        // Test localStorage functionality
+        function testStorage() {
+            try {
+                const testKey = 'test-auto-load-tabs';
+                const testData = { test: 'data' };
+                localStorage.setItem(testKey, JSON.stringify(testData));
+                const retrieved = JSON.parse(localStorage.getItem(testKey));
+                localStorage.removeItem(testKey);
+                
+                if (retrieved.test === 'data') {
+                    showStatus('✅ localStorage is working correctly', 'success');
+                } else {
+                    showStatus('❌ localStorage test failed', 'error');
+                }
+            } catch (e) {
+                showStatus('❌ localStorage is not available: ' + e.message, 'error');
+            }
+        }
+        
+        // Run storage test on load
+        window.addEventListener('DOMContentLoaded', testStorage);
+    </script>
+</body>
+</html> 

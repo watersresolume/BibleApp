@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annotation Persistence Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #45a049;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #4CAF50;
+            color: white;
+        }
+        .error {
+            background: #f44336;
+            color: white;
+        }
+        .info {
+            background: #2196F3;
+            color: white;
+        }
+        #mainApp {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Annotation Persistence Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button class="test-button" onclick="testAnnotationSaving()">Test Annotation Saving</button>
+        <button class="test-button" onclick="testTabSwitching()">Test Tab Switching</button>
+        <button class="test-button" onclick="testPageReload()">Test Page Reload</button>
+        <button class="test-button" onclick="clearAllAnnotations()">Clear All Annotations</button>
+        <button class="test-button" onclick="showLocalStorage()">Show localStorage</button>
+    </div>
+    
+    <div id="testResults"></div>
+    
+    <div id="mainApp">
+        <!-- The main Bible app will be loaded here -->
+    </div>
+
+    <script type="module">
+        // Import the main app
+        import('./app.js').then(() => {
+            console.log('Main app loaded');
+        }).catch(err => {
+            console.error('Failed to load main app:', err);
+        });
+
+        // Test functions
+        window.testAnnotationSaving = function() {
+            const results = document.getElementById('testResults');
+            results.innerHTML = '<div class="status info">Testing annotation saving...</div>';
+            
+            // Wait for app to be ready
+            setTimeout(() => {
+                if (window.bibleApp) {
+                    const activeTab = window.bibleApp.tabs.find(t => t.id === window.bibleApp.activeTabId);
+                    if (activeTab && activeTab.loaded) {
+                        const passageKey = `bible-annotations-${activeTab.book}-${activeTab.chapter}-${activeTab.verse}-${activeTab.verseEnd}-${activeTab.translation}`;
+                        const savedData = localStorage.getItem(passageKey + '-strokes');
+                        
+                        if (savedData) {
+                            const strokes = JSON.parse(savedData);
+                            results.innerHTML = `<div class="status success">✅ Annotation saving working! Found ${strokes.length} saved strokes for passage: ${passageKey}</div>`;
+                        } else {
+                            results.innerHTML = `<div class="status info">ℹ️ No saved annotations found for current passage. Try drawing some annotations first.</div>`;
+                        }
+                    } else {
+                        results.innerHTML = '<div class="status error">❌ No loaded passage found. Please load a Bible passage first.</div>';
+                    }
+                } else {
+                    results.innerHTML = '<div class="status error">❌ Bible app not loaded yet. Please wait a moment and try again.</div>';
+                }
+            }, 1000);
+        };
+
+        window.testTabSwitching = function() {
+            const results = document.getElementById('testResults');
+            results.innerHTML = '<div class="status info">Testing tab switching...</div>';
+            
+            setTimeout(() => {
+                if (window.bibleApp && window.bibleApp.tabs.length > 1) {
+                    const originalTab = window.bibleApp.activeTabId;
+                    const otherTab = window.bibleApp.tabs.find(t => t.id !== originalTab);
+                    
+                    if (otherTab) {
+                        window.bibleApp.switchTab(otherTab.id);
+                        setTimeout(() => {
+                            window.bibleApp.switchTab(originalTab);
+                            results.innerHTML = '<div class="status success">✅ Tab switching test completed. Check if annotations are preserved.</div>';
+                        }, 500);
+                    } else {
+                        results.innerHTML = '<div class="status info">ℹ️ Only one tab available. Create another tab to test switching.</div>';
+                    }
+                } else {
+                    results.innerHTML = '<div class="status info">ℹ️ Need at least 2 tabs to test switching. Create another tab first.</div>';
+                }
+            }, 1000);
+        };
+
+        window.testPageReload = function() {
+            const results = document.getElementById('testResults');
+            results.innerHTML = '<div class="status info">Testing page reload... This will reload the page in 3 seconds.</div>';
+            
+            setTimeout(() => {
+                location.reload();
+            }, 3000);
+        };
+
+        window.clearAllAnnotations = function() {
+            const results = document.getElementById('testResults');
+            results.innerHTML = '<div class="status info">Clearing all annotations...</div>';
+            
+            // Clear all stroke-based annotations
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.endsWith('-strokes')) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
+            results.innerHTML = `<div class="status success">✅ Cleared ${keysToRemove.length} annotation entries from localStorage.</div>`;
+            
+            // Reload the page to reset the app state
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        };
+
+        window.showLocalStorage = function() {
+            const results = document.getElementById('testResults');
+            const annotationKeys = [];
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.includes('bible-annotations')) {
+                    const value = localStorage.getItem(key);
+                    try {
+                        const data = JSON.parse(value);
+                        annotationKeys.push(`${key}: ${data.length} strokes`);
+                    } catch (e) {
+                        annotationKeys.push(`${key}: invalid data`);
+                    }
+                }
+            }
+            
+            if (annotationKeys.length > 0) {
+                results.innerHTML = `<div class="status info"><strong>Annotation data in localStorage:</strong><br>${annotationKeys.join('<br>')}</div>`;
+            } else {
+                results.innerHTML = '<div class="status info">No annotation data found in localStorage.</div>';
+            }
+        };
+    </script>
+</body>
+</html> 
