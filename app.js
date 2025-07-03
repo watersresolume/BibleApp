@@ -1173,7 +1173,7 @@ class BibleApp {
             // Initialize the client
             await gapi.client.init({
                 apiKey: 'AIzaSyCxaL3Ki_XpLiEAvsWG7QtlUF9w4ZGlZ9k', // You'll need to get this from Google Cloud Console
-                clientId: '208409322947-m60h2v2veg0qfna4nv2v3k3tnu7nm429.apps.googleusercontent.com', // You'll need to get this too
+                clientId: '208409322947-960nuv1adq19f9joop57g76ml84hm0i2.apps.googleusercontent.com', // Updated OAuth client ID
                 discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
                 scope: 'https://www.googleapis.com/auth/drive.readonly'
             });
