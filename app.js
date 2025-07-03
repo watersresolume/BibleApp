@@ -1154,9 +1154,9 @@ class BibleApp {
         }
 
         try {
-            console.log('[DEBUG] Loading gapi client and auth2...');
+            console.log('[DEBUG] Loading gapi client...');
             await new Promise((resolve, reject) => {
-                gapi.load('client:auth2', {
+                gapi.load('client', {
                     callback: () => {
                         console.log('[DEBUG] Google APIs loaded successfully');
                         resolve();
@@ -1172,10 +1172,8 @@ class BibleApp {
             
             // Initialize the client
             await gapi.client.init({
-                apiKey: 'AIzaSyCxaL3Ki_XpLiEAvsWG7QtlUF9w4ZGlZ9k', // You'll need to get this from Google Cloud Console
-                clientId: '208409322947-960nuv1adq19f9joop57g76ml84hm0i2.apps.googleusercontent.com', // Updated OAuth client ID
-                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
-                scope: 'https://www.googleapis.com/auth/drive.readonly'
+                apiKey: 'AIzaSyCxaL3Ki_XpLiEAvsWG7QtlUF9w4ZGlZ9k',
+                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
             });
 
             console.log('[DEBUG] Google Drive API initialized successfully');
@@ -1200,27 +1198,42 @@ class BibleApp {
     }
 
     async loadGoogleAPIs() {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://apis.google.com/js/api.js';
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
+        // Load both the Google API and Identity Services
+        await Promise.all([
+            new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://apis.google.com/js/api.js';
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            }),
+            new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://accounts.google.com/gsi/client';
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            })
+        ]);
     }
 
     async authenticateAndLoadFiles(driveFolderId) {
-        const authInstance = gapi.auth2.getAuthInstance();
-        
         try {
-            // Check if user is already signed in
-            if (!authInstance.isSignedIn.get()) {
-                console.log('[DEBUG] User not signed in, prompting for authentication...');
-                await authInstance.signIn();
-            }
-
-            console.log('[DEBUG] User authenticated, fetching files...');
-            await this.fetchDriveFiles(driveFolderId);
+            console.log('[DEBUG] User not signed in, prompting for authentication...');
+            const tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: '208409322947-960nuv1adq19f9joop57g76ml84hm0i2.apps.googleusercontent.com',
+                scope: 'https://www.googleapis.com/auth/drive.readonly',
+                callback: async (response) => {
+                    if (response.error !== undefined) {
+                        throw response;
+                    }
+                    console.log('[DEBUG] User authenticated, fetching files...');
+                    await this.fetchDriveFiles(driveFolderId);
+                }
+            });
+            
+            // Request an access token
+            tokenClient.requestAccessToken();
         } catch (error) {
             console.error('[ERROR] Authentication failed:', error);
             this.showDriveAuthError();
