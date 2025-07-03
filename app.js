@@ -1147,34 +1147,32 @@ class BibleApp {
     async initializeGoogleDriveAPI() {
         console.log('[DEBUG] Starting Google Drive API initialization...');
         
-        // Load Google APIs if not already loaded
-        if (!window.gapi) {
+        if (!window.google || !window.gapi) {
             console.log('[DEBUG] Loading Google APIs script...');
             await this.loadGoogleAPIs();
         }
 
         try {
-            console.log('[DEBUG] Loading gapi client...');
-            await new Promise((resolve, reject) => {
-                gapi.load('client', {
-                    callback: () => {
-                        console.log('[DEBUG] Google APIs loaded successfully');
-                        resolve();
-                    },
-                    onerror: (error) => {
-                        console.error('[ERROR] Failed to load Google APIs:', error);
-                        reject(error);
-                    }
-                });
-            });
-
             console.log('[DEBUG] Initializing gapi client...');
             
-            // Initialize the client
-            await gapi.client.init({
-                apiKey: 'AIzaSyCxaL3Ki_XpLiEAvsWG7QtlUF9w4ZGlZ9k',
-                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+            // Initialize basic API client
+            await new Promise((resolve) => {
+                gapi.load('client', resolve);
             });
+            
+            await gapi.client.init({
+                apiKey: 'AIzaSyCxaL3Ki_XpLiEAvsWG7QtlUF9w4ZGlZ9k'
+            });
+
+            // Initialize token client
+            const tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: '208409322947-960nuv1adq19f9joop57g76ml84hm0i2.apps.googleusercontent.com',
+                scope: 'https://www.googleapis.com/auth/drive.readonly',
+                callback: () => {} // Will be overridden in authenticateAndLoadFiles
+            });
+            
+            // Store token client for later use
+            this.tokenClient = tokenClient;
 
             console.log('[DEBUG] Google Drive API initialized successfully');
             console.log('[DEBUG] Current origin:', window.location.origin);
@@ -1198,18 +1196,23 @@ class BibleApp {
     }
 
     async loadGoogleAPIs() {
-        // Load both the Google API and Identity Services
         await Promise.all([
+            // Load Google Identity Services
             new Promise((resolve, reject) => {
                 const script = document.createElement('script');
-                script.src = 'https://apis.google.com/js/api.js';
+                script.src = 'https://accounts.google.com/gsi/client';
+                script.async = true;
+                script.defer = true;
                 script.onload = resolve;
                 script.onerror = reject;
                 document.head.appendChild(script);
             }),
+            // Load basic Google API client
             new Promise((resolve, reject) => {
                 const script = document.createElement('script');
-                script.src = 'https://accounts.google.com/gsi/client';
+                script.src = 'https://apis.google.com/js/api.js';
+                script.async = true;
+                script.defer = true;
                 script.onload = resolve;
                 script.onerror = reject;
                 document.head.appendChild(script);
@@ -1220,20 +1223,24 @@ class BibleApp {
     async authenticateAndLoadFiles(driveFolderId) {
         try {
             console.log('[DEBUG] User not signed in, prompting for authentication...');
-            const tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: '208409322947-960nuv1adq19f9joop57g76ml84hm0i2.apps.googleusercontent.com',
-                scope: 'https://www.googleapis.com/auth/drive.readonly',
-                callback: async (response) => {
+            
+            // Request access token
+            await new Promise((resolve, reject) => {
+                this.tokenClient.callback = async (response) => {
                     if (response.error !== undefined) {
-                        throw response;
+                        reject(response);
+                        return;
                     }
                     console.log('[DEBUG] User authenticated, fetching files...');
-                    await this.fetchDriveFiles(driveFolderId);
-                }
+                    try {
+                        await this.fetchDriveFiles(driveFolderId);
+                        resolve();
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                this.tokenClient.requestAccessToken();
             });
-            
-            // Request an access token
-            tokenClient.requestAccessToken();
         } catch (error) {
             console.error('[ERROR] Authentication failed:', error);
             this.showDriveAuthError();
@@ -1242,23 +1249,38 @@ class BibleApp {
 
     async fetchDriveFiles(folderId) {
         try {
-            // Fetch files from the specified folder
-            const response = await gapi.client.drive.files.list({
-                q: `'${folderId}' in parents and trashed=false`,
-                fields: 'files(id,name,mimeType,thumbnailLink,webViewLink,size,modifiedTime)',
-                pageSize: 50
-            });
+            console.log('[DEBUG] Attempting to fetch files from folder:', folderId);
+            
+            // Make direct API request
+            const response = await fetch(
+                `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&fields=files(id,name,mimeType,thumbnailLink,webViewLink,size,modifiedTime)&pageSize=50&supportsAllDrives=true&includeItemsFromAllDrives=true&key=${encodeURIComponent('AIzaSyCxaL3Ki_XpLiEAvsWG7QtlUF9w4ZGlZ9k')}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${gapi.client.getToken().access_token}`
+                    }
+                }
+            );
 
-            const files = response.result.files;
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('[DEBUG] API response:', result);
+
+            const files = result.files || [];
             console.log('[DEBUG] Fetched files:', files);
 
-            if (files && files.length > 0) {
+            if (files.length > 0) {
                 this.displayRealMediaThumbnails(files);
             } else {
                 this.showEmptyFolderMessage();
             }
         } catch (error) {
             console.error('[ERROR] Failed to fetch files:', error);
+            if (error.status === 403) {
+                console.error('[ERROR] Permission denied. Please check folder permissions.');
+            }
             this.showDriveError(error);
         }
     }
