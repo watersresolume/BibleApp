@@ -308,7 +308,3 @@ export default class LocalMediaHandler {
     }
 }
 
-// Initialize when the page loads
-window.addEventListener('load', () => {
-    window.localMediaHandler = new LocalMediaHandler();
-});

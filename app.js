@@ -3,6 +3,7 @@
 
 // Import word data functions
 import { getWordInfo, hasWordData } from './word-data.js';
+import LocalMediaHandler from './local-media-handler.js';
 
 // Make word data functions globally available
 window.getWordInfo = getWordInfo;
@@ -1458,8 +1459,8 @@ export default class BibleApp {
 
     setupMediaTabInteractions(tabId) {
         // Initialize local media handler if not already initialized
-        if (!window.localMediaHandler) {
-            window.localMediaHandler = new LocalMediaHandler();
+        if (!this.localMediaHandler) {
+            this.localMediaHandler = new LocalMediaHandler();
         }
 
         // Save media content when changes are made
@@ -1619,14 +1620,14 @@ export default class BibleApp {
     }
 
     addMediaToCanvas(mediaData, x, y, canvas) {
-        if (window.localMediaHandler) {
-            window.localMediaHandler.addMediaToCanvas(mediaData, x, y, canvas);
+        if (this.localMediaHandler) {
+            this.localMediaHandler.addMediaToCanvas(mediaData, x, y, canvas);
         }
     }
 
     makeMediaItemInteractive(item) {
-        if (window.localMediaHandler) {
-            window.localMediaHandler.makeMediaItemInteractive(item);
+        if (this.localMediaHandler) {
+            this.localMediaHandler.makeMediaItemInteractive(item);
         }
     }
 
