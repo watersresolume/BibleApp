@@ -865,7 +865,7 @@ function getCurrentDrawingSettings() {
   return null;
 }
 
-class BibleApp {
+module.exports = class BibleApp {
     constructor() {
         window.bibleApp = this; // Ensure global reference is set early
         this.tabs = [];
@@ -1074,21 +1074,11 @@ class BibleApp {
     }
 
     getDefaultMediaContent() {
-        // Get the stored Drive folder ID or use a default empty state
-        const driveFolderId = localStorage.getItem('driveFolderId') || '';
-        
         return `
             <div class="media-workspace">
                 <div class="media-thumbnails-section">
                     <div class="media-card-grid">
-                        <div class="media-card link-chooser-card" data-type="link-chooser">
-                            <div class="card-content">
-                                <div class="card-icon">⚙️</div>
-                                <div class="card-title">Media Source</div>
-                                <div class="card-subtitle">Configure Drive Link</div>
-                            </div>
-                        </div>
-                        ${this.generateMediaThumbnails(driveFolderId)}
+                        <!-- Local media content will be populated here -->
                     </div>
                 </div>
                 
@@ -1329,43 +1319,31 @@ class BibleApp {
     }
 
     getFileType(mimeType) {
-        if (mimeType.startsWith('image/')) return 'image';
-        if (mimeType.startsWith('video/')) return 'video';
-        if (mimeType.startsWith('audio/')) return 'audio';
-        if (mimeType.includes('pdf')) return 'pdf';
-        if (mimeType.includes('document') || mimeType.includes('text')) return 'document';
-        if (mimeType.includes('spreadsheet')) return 'spreadsheet';
-        if (mimeType.includes('presentation')) return 'presentation';
+        if (window.localMediaHandler) {
+            return window.localMediaHandler.getFileType(mimeType);
+        }
         return 'file';
     }
 
     getDefaultThumbnail(fileType) {
-        const icons = {
-            image: '🖼️',
-            video: '🎥',
-            audio: '🎵',
-            pdf: '📄',
-            document: '📝',
-            spreadsheet: '📊',
-            presentation: '📺',
-            file: '📁'
-        };
-        return icons[fileType] || '📁';
+        if (window.localMediaHandler) {
+            return window.localMediaHandler.getFileIcon(fileType);
+        }
+        return '📁';
     }
 
     truncateFileName(name, maxLength = 15) {
-        if (name.length <= maxLength) return name;
-        const ext = name.split('.').pop();
-        const baseName = name.substring(0, name.lastIndexOf('.'));
-        const truncated = baseName.substring(0, maxLength - ext.length - 4) + '...';
-        return truncated + '.' + ext;
+        if (window.localMediaHandler) {
+            return window.localMediaHandler.truncateFileName(name, maxLength);
+        }
+        return name;
     }
 
     formatFileSize(bytes) {
-        if (!bytes) return '';
-        const sizes = ['B', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(1024));
-        return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        if (window.localMediaHandler) {
+            return window.localMediaHandler.formatFileSize(bytes);
+        }
+        return '';
     }
 
     showDriveAuthError() {
@@ -1479,69 +1457,9 @@ class BibleApp {
     }
 
     setupMediaTabInteractions(tabId) {
-        // Setup link chooser popup
-        const linkChooserCard = document.querySelector('.link-chooser-card');
-        if (linkChooserCard) {
-            linkChooserCard.addEventListener('click', () => {
-                this.showLinkChooserPopup();
-            });
-        }
-
-        // Initialize Google Drive API and load files if we have a folder ID
-        const driveFolderId = localStorage.getItem('driveFolderId');
-        if (driveFolderId) {
-            setTimeout(async () => {
-                console.log('[DEBUG] Initializing Google Drive API for media tab...');
-                const apiInitialized = await this.initializeGoogleDriveAPI();
-                if (apiInitialized) {
-                    await this.authenticateAndLoadFiles(driveFolderId);
-                }
-            }, 1000);
-        }
-
-        // Setup drag and drop for media cards
-        const mediaCards = document.querySelectorAll('.media-card[data-media-id]');
-        const mediaCanvas = document.getElementById('mediaCanvas');
-
-        mediaCards.forEach(card => {
-            card.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('text/plain', JSON.stringify({
-                    id: card.dataset.mediaId,
-                    type: card.dataset.mediaType,
-                    name: card.querySelector('.card-title').textContent,
-                    icon: card.querySelector('.card-icon') ? card.querySelector('.card-icon').textContent : '📁'
-                }));
-                card.classList.add('dragging');
-            });
-
-            card.addEventListener('dragend', () => {
-                card.classList.remove('dragging');
-            });
-        });
-
-        if (mediaCanvas) {
-            mediaCanvas.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                mediaCanvas.classList.add('drag-over');
-            });
-
-            mediaCanvas.addEventListener('dragleave', (e) => {
-                if (!mediaCanvas.contains(e.relatedTarget)) {
-                    mediaCanvas.classList.remove('drag-over');
-                }
-            });
-
-            mediaCanvas.addEventListener('drop', (e) => {
-                e.preventDefault();
-                mediaCanvas.classList.remove('drag-over');
-                
-                try {
-                    const mediaData = JSON.parse(e.dataTransfer.getData('text/plain'));
-                    this.addMediaToCanvas(mediaData, e.clientX, e.clientY, mediaCanvas);
-                } catch (error) {
-                    console.error('Error handling media drop:', error);
-                }
-            });
+        // Initialize local media handler if not already initialized
+        if (!window.localMediaHandler) {
+            window.localMediaHandler = new LocalMediaHandler();
         }
 
         // Save media content when changes are made
@@ -1553,6 +1471,7 @@ class BibleApp {
         };
 
         // Auto-save on any changes to the canvas
+        const mediaCanvas = document.getElementById('mediaCanvas');
         if (mediaCanvas) {
             const observer = new MutationObserver(saveMediaContent);
             observer.observe(mediaCanvas, { childList: true, subtree: true, attributes: true });
@@ -1700,88 +1619,15 @@ class BibleApp {
     }
 
     addMediaToCanvas(mediaData, x, y, canvas) {
-        // Remove placeholder if it exists
-        const placeholder = canvas.querySelector('.canvas-placeholder');
-        if (placeholder) {
-            placeholder.remove();
+        if (window.localMediaHandler) {
+            window.localMediaHandler.addMediaToCanvas(mediaData, x, y, canvas);
         }
-
-        // Create media item
-        const mediaItem = document.createElement('div');
-        mediaItem.className = 'canvas-media-item';
-        mediaItem.dataset.mediaId = mediaData.id;
-        mediaItem.style.left = (x - canvas.getBoundingClientRect().left) + 'px';
-        mediaItem.style.top = (y - canvas.getBoundingClientRect().top) + 'px';
-        
-        mediaItem.innerHTML = `
-            <div class="media-item-content">
-                <div class="media-item-icon">${mediaData.icon}</div>
-                <div class="media-item-name">${mediaData.name}</div>
-                <div class="media-item-controls">
-                    <button class="resize-handle">⤡</button>
-                    <button class="remove-item">&times;</button>
-                </div>
-            </div>
-        `;
-
-        canvas.querySelector('.canvas-content').appendChild(mediaItem);
-
-        // Make the item draggable and resizable
-        this.makeMediaItemInteractive(mediaItem);
     }
 
     makeMediaItemInteractive(item) {
-        let isDragging = false;
-        let isResizing = false;
-        let startX, startY, startLeft, startTop, startWidth, startHeight;
-
-        // Dragging functionality
-        const handleMouseDown = (e) => {
-            if (e.target.classList.contains('resize-handle')) {
-                isResizing = true;
-                startX = e.clientX;
-                startY = e.clientY;
-                startWidth = parseInt(getComputedStyle(item).width);
-                startHeight = parseInt(getComputedStyle(item).height);
-            } else if (!e.target.classList.contains('remove-item')) {
-                isDragging = true;
-                startX = e.clientX;
-                startY = e.clientY;
-                startLeft = parseInt(item.style.left);
-                startTop = parseInt(item.style.top);
-            }
-            
-            e.preventDefault();
-        };
-
-        const handleMouseMove = (e) => {
-            if (isDragging) {
-                const deltaX = e.clientX - startX;
-                const deltaY = e.clientY - startY;
-                item.style.left = (startLeft + deltaX) + 'px';
-                item.style.top = (startTop + deltaY) + 'px';
-            } else if (isResizing) {
-                const deltaX = e.clientX - startX;
-                const deltaY = e.clientY - startY;
-                item.style.width = Math.max(150, startWidth + deltaX) + 'px';
-                item.style.height = Math.max(100, startHeight + deltaY) + 'px';
-            }
-        };
-
-        const handleMouseUp = () => {
-            isDragging = false;
-            isResizing = false;
-        };
-
-        item.addEventListener('mousedown', handleMouseDown);
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-
-        // Remove button functionality
-        const removeBtn = item.querySelector('.remove-item');
-        removeBtn.addEventListener('click', () => {
-            item.remove();
-        });
+        if (window.localMediaHandler) {
+            window.localMediaHandler.makeMediaItemInteractive(item);
+        }
     }
 
     switchTab(tabId) {

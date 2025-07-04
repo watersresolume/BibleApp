@@ -2,7 +2,7 @@
   "name": "bible-app",
   "version": "1.0.0",
   "description": "Minimalist Bible App for Portrait-Oriented Touchscreen TV",
-  "type": "module",
+  "type": "commonjs",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -19,5 +19,9 @@
   "devDependencies": {
     "electron": "^30.0.0",
     "electron-packager": "^17.1.2"
+  },
+  "dependencies": {
+    "fs-extra": "^11.2.0",
+    "path": "^0.12.7"
   }
 }
