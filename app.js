@@ -865,7 +865,7 @@ function getCurrentDrawingSettings() {
   return null;
 }
 
-module.exports = class BibleApp {
+export default class BibleApp {
     constructor() {
         window.bibleApp = this; // Ensure global reference is set early
         this.tabs = [];

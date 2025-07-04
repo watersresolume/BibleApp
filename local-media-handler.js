@@ -1,5 +1,5 @@
 // Local Media Handler
-module.exports = class LocalMediaHandler {
+export default class LocalMediaHandler {
     constructor() {
         this.mediaFolderPath = "G:\\Shared drives\\Location Assets\\Presentation Media";
         this.setupMediaView();
