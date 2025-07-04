@@ -4226,51 +4226,46 @@ const annotationOverlayCanvases = {}; // overlay canvases for real-time feedback
 function getOrCreateAnnotationCanvas(tabId) {
   let readingArea = document.getElementById(`readingArea${tabId}`);
   if (!readingArea) return null;
+  
   let canvas = readingArea.querySelector('.annotation-canvas');
   const dpr = window.devicePixelRatio || 1;
   const bibleText = readingArea.querySelector('.bible-text');
-  let contentHeight = 0;
-  if (bibleText) {
-    contentHeight = bibleText.scrollHeight + 200;
-  } else {
-    contentHeight = readingArea.scrollHeight + 200;
-  }
+  
+  // Calculate full content height including scroll area
+  const contentHeight = bibleText ? bibleText.scrollHeight : readingArea.scrollHeight;
   const displayWidth = readingArea.offsetWidth;
-  const displayHeight = Math.max(contentHeight, readingArea.offsetHeight + 200);
+  const displayHeight = contentHeight;
+  
   let needsResize = false;
+  
   if (!canvas) {
     canvas = document.createElement('canvas');
     canvas.className = 'annotation-canvas';
     canvas.style.position = 'absolute';
-    canvas.style.top = '0px';
-    canvas.style.left = '0px';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
     canvas.style.width = '100%';
-    canvas.style.height = displayHeight + 'px';
-    // CRITICAL FIX: Set pointer events based on select mode
+    canvas.style.height = contentHeight + 'px';
     canvas.style.pointerEvents = selectModeActive ? 'none' : 'auto';
     canvas.style.background = 'transparent';
     canvas.style.cursor = 'crosshair';
-    canvas.style.zIndex = 9999;
-    canvas.style.touchAction = 'pan-x pan-y'; // Allow scrolling but prevent other gestures
-    canvas.style.userSelect = 'none';
-    canvas.style.webkitUserSelect = 'none';
-    canvas.style.mozUserSelect = 'none';
-    canvas.style.msUserSelect = 'none';
+    canvas.style.zIndex = '2';
+    canvas.style.touchAction = 'pan-x pan-y';
     canvas.style.transform = 'translateZ(0)';
     readingArea.appendChild(canvas);
     needsResize = true;
   } else {
     const widthDiff = Math.abs(canvas._lastWidth - displayWidth);
     const heightDiff = Math.abs(canvas._lastHeight - displayHeight);
-    needsResize = widthDiff > 10 || heightDiff > 10 || canvas._lastDpr !== dpr;
+    needsResize = widthDiff > 1 || heightDiff > 1 || canvas._lastDpr !== dpr;
   }
+
   if (needsResize) {
     canvas.width = displayWidth * dpr;
     canvas.height = displayHeight * dpr;
     canvas.style.width = displayWidth + 'px';
     canvas.style.height = displayHeight + 'px';
     
-    // Simple, reliable canvas context
     const ctx = canvas.getContext('2d');
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpr, dpr);
@@ -4279,63 +4274,58 @@ function getOrCreateAnnotationCanvas(tabId) {
     canvas._lastHeight = displayHeight;
     canvas._lastDpr = dpr;
   }
+  
   annotationCanvases[tabId] = canvas;
 
-  // --- Overlay canvas for real-time feedback ---
+  // Create overlay canvas with same dimensions
   let overlay = readingArea.querySelector('.annotation-overlay-canvas');
   if (!overlay) {
     overlay = document.createElement('canvas');
     overlay.className = 'annotation-overlay-canvas';
     overlay.style.position = 'absolute';
-    overlay.style.top = '0px';
-    overlay.style.left = '0px';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
     overlay.style.width = '100%';
-    overlay.style.height = displayHeight + 'px';
-    overlay.style.pointerEvents = 'none'; // let pointer events go to main canvas
+    overlay.style.height = contentHeight + 'px';
+    overlay.style.pointerEvents = 'none';
     overlay.style.background = 'transparent';
-    overlay.style.zIndex = 10000;
-    overlay.style.touchAction = 'pan-x pan-y'; // Allow scrolling but prevent other gestures
-    overlay.style.userSelect = 'none';
-    overlay.style.webkitUserSelect = 'none';
-    overlay.style.mozUserSelect = 'none';
-    overlay.style.msUserSelect = 'none';
+    overlay.style.zIndex = '3';
     overlay.style.transform = 'translateZ(0)';
     readingArea.appendChild(overlay);
     needsResize = true;
   }
+  
   if (needsResize) {
     overlay.width = displayWidth * dpr;
     overlay.height = displayHeight * dpr;
     overlay.style.width = displayWidth + 'px';
     overlay.style.height = displayHeight + 'px';
     
-    // Simple overlay canvas context
     const ctx = overlay.getContext('2d');
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpr, dpr);
   }
+  
   annotationOverlayCanvases[tabId] = overlay;
 
-  // Offscreen canvas for full scrollable area - now matches visible canvas size
-  const fullWidth = displayWidth;
-  const fullHeight = displayHeight;
+  // Offscreen canvas matches content height
   let offscreen = annotationOffscreen[tabId];
-  if (!offscreen || offscreen.width !== fullWidth * dpr || offscreen.height !== fullHeight * dpr) {
-    // Creating new offscreen canvas
-    const hadPreviousOffscreen = !!offscreen;
+  if (!offscreen) {
     offscreen = document.createElement('canvas');
-    offscreen.width = fullWidth * dpr;
-    offscreen.height = fullHeight * dpr;
+    offscreen.width = displayWidth * dpr;
+    offscreen.height = displayHeight * dpr;
+    const ctx = offscreen.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
     annotationOffscreen[tabId] = offscreen;
-    
-    // Restore strokes if we had a previous canvas
-    if (hadPreviousOffscreen) {
-      const passageKey = getCurrentPassageKey();
-      if (passageKey && strokeHistory[passageKey] && strokeHistory[passageKey].length > 0) {
-        setTimeout(() => redrawAllStrokes(tabId), 10);
-      }
-    }
+  } else if (needsResize) {
+    offscreen.width = displayWidth * dpr;
+    offscreen.height = displayHeight * dpr;
+    const ctx = offscreen.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
   }
+
   return canvas;
 }
 

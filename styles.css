@@ -301,9 +301,13 @@ body {
 
 /* Reading Area */
 .reading-area {
-    height: 60vh;
-    overflow-y: auto;
+    flex: 1;
     position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #181818;
+    height: auto;
+    min-height: 0;
 }
 
 .reading-area::-webkit-scrollbar {
@@ -315,17 +319,16 @@ body {
 }
 
 .bible-text {
+    position: relative;
+    z-index: 1;
     padding: 30px;
+    padding-bottom: 60px;
     line-height: 1.8;
     font-size: 50px;
     color: #e0e0e0;
     background: #1a1a1a;
     font-weight: 400;
     letter-spacing: 0.01em;
-    position: relative;
-    z-index: 1;
-    padding-bottom: 120px; /* Extra space for drawing below text */
-    padding-top: 20px;
 }
 
 .bible-text::-webkit-scrollbar {
@@ -401,11 +404,24 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 9999 !important;
+    z-index: 2;
     pointer-events: none;
     background: transparent !important;
     cursor: crosshair;
     touch-action: pan-x pan-y;
+    will-change: transform;
+}
+
+.annotation-overlay-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    pointer-events: none;
+    background: transparent !important;
+    will-change: transform;
 }
 
 body.drawing,
@@ -1647,9 +1663,10 @@ select option {
 /* Tab Content */
 .tab-content {
     flex: 1;
-    position: relative;
     display: flex;
-    min-height: 0;
+    flex-direction: column;
+    overflow: hidden;
+    background: #181818;
 }
 
 .tab-panel {
@@ -2563,6 +2580,7 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+  overflow: hidden;
   background: #181818;
 }
 #app {
@@ -2571,19 +2589,20 @@ html, body {
   flex-direction: column;
 }
 .tab-content {
-  flex: 1 1 auto;
-  min-height: 0;
-  background: #181818;
+  flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  background: #181818;
 }
 .reading-area {
-  flex: 1 1 auto;
-  min-height: 0;
-  background: #181818;
+  flex: 1;
   position: relative;
   overflow-y: auto;
   overflow-x: hidden;
+  background: #181818;
+  height: auto;
+  min-height: 0;
 }
 
 /* When a drawing tool is active, enable pointer events on the canvas (add a class in JS if needed) */
