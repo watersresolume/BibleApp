@@ -1,7 +1,6 @@
 // Local Media Handler
 export default class LocalMediaHandler {
     constructor() {
-        this.mediaFolderPath = "G:\\Shared drives\\Location Assets\\Presentation Media";
         this.setupMediaView();
     }
 
@@ -9,12 +8,11 @@ export default class LocalMediaHandler {
         const mediaContent = `
             <div class="media-workspace">
                 <div class="media-thumbnails-section">
-                    <div class="media-card-grid">
-                        <div class="media-card" id="refreshMediaBtn">
-                            <div class="card-content">
-                                <div class="card-icon">🔄</div>
-                                <div class="card-title">Refresh Media</div>
-                                <div class="card-subtitle">Click to reload</div>
+                    <div class="media-scroll-container">
+                        <div class="media-card add-files" id="refreshMediaBtn">
+                            <input type="file" id="fileInput" multiple style="display: none" accept="image/*,video/*,audio/*,.pdf"/>
+                            <div class="media-thumbnail">
+                                <div class="add-icon">+</div>
                             </div>
                         </div>
                     </div>
@@ -24,11 +22,177 @@ export default class LocalMediaHandler {
                     <div class="canvas-content">
                         <div class="canvas-placeholder">
                             <div class="placeholder-icon">🖼️</div>
-                            <div class="placeholder-text">Loading media from ${this.mediaFolderPath}</div>
+                            <div class="placeholder-text">Drag media here</div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <style>
+                .media-workspace {
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
+                    background: #1e1e1e;
+                }
+
+                .media-thumbnails-section {
+                    flex: 0 0 120px;
+                    background: #2d2d2d;
+                    border-bottom: 1px solid #3d3d3d;
+                    padding: 10px;
+                    overflow: hidden;
+                }
+
+                .media-scroll-container {
+                    display: flex;
+                    gap: 10px;
+                    overflow-x: auto;
+                    overflow-y: hidden;
+                    height: 100%;
+                    padding-bottom: 10px; /* Space for scrollbar */
+                    white-space: nowrap;
+                }
+
+                .media-scroll-container::-webkit-scrollbar {
+                    height: 6px;
+                }
+
+                .media-scroll-container::-webkit-scrollbar-track {
+                    background: #1e1e1e;
+                    border-radius: 3px;
+                }
+
+                .media-scroll-container::-webkit-scrollbar-thumb {
+                    background: #4d4d4d;
+                    border-radius: 3px;
+                }
+
+                .media-scroll-container::-webkit-scrollbar-thumb:hover {
+                    background: #555;
+                }
+
+                .media-card {
+                    flex: 0 0 100px;
+                    height: 100px;
+                    background: #363636;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    cursor: grab;
+                    transition: all 0.2s ease;
+                    position: relative;
+                }
+
+                .media-card:hover {
+                    background: #404040;
+                    transform: translateY(-2px);
+                }
+
+                .media-card.add-files {
+                    cursor: pointer;
+                    border: 2px dashed #4d4d4d;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .add-icon {
+                    font-size: 32px;
+                    color: #6d6d6d;
+                }
+
+                .media-thumbnail {
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    position: relative;
+                }
+
+                .media-thumbnail img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+
+                .media-thumbnail .file-icon {
+                    font-size: 32px;
+                    color: #fff;
+                }
+
+                .media-canvas {
+                    flex: 1;
+                    position: relative;
+                    overflow: auto;
+                }
+
+                .canvas-content {
+                    min-height: 100%;
+                    position: relative;
+                }
+
+                .canvas-placeholder {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    text-align: center;
+                    color: #6d6d6d;
+                }
+
+                .canvas-media-item {
+                    position: absolute;
+                    min-width: 150px;
+                    min-height: 100px;
+                    background: rgba(45, 45, 45, 0.9);
+                    border-radius: 8px;
+                    overflow: hidden;
+                    cursor: grab;
+                }
+
+                .canvas-media-item img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                }
+
+                .media-item-controls {
+                    position: absolute;
+                    top: 5px;
+                    right: 5px;
+                    display: flex;
+                    gap: 5px;
+                    opacity: 0;
+                    transition: opacity 0.2s;
+                }
+
+                .canvas-media-item:hover .media-item-controls {
+                    opacity: 1;
+                }
+
+                .media-item-controls button {
+                    width: 24px;
+                    height: 24px;
+                    border: none;
+                    border-radius: 4px;
+                    background: rgba(0, 0, 0, 0.6);
+                    color: white;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 14px;
+                }
+
+                .media-item-controls button:hover {
+                    background: rgba(0, 0, 0, 0.8);
+                }
+
+                .drag-over {
+                    border: 2px dashed #4d9fff !important;
+                }
+            </style>
         `;
 
         // Replace the media content
@@ -36,16 +200,20 @@ export default class LocalMediaHandler {
         if (mediaContentDiv) {
             mediaContentDiv.innerHTML = mediaContent;
             this.setupEventListeners();
-            this.loadMediaFromFolder();
         }
     }
 
     setupEventListeners() {
         const refreshBtn = document.getElementById('refreshMediaBtn');
+        const fileInput = document.getElementById('fileInput');
         
-        if (refreshBtn) {
+        if (refreshBtn && fileInput) {
             refreshBtn.addEventListener('click', () => {
-                this.loadMediaFromFolder();
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                this.handleFileSelection(e.target.files);
             });
         }
 
@@ -77,85 +245,43 @@ export default class LocalMediaHandler {
         }
     }
 
-    async loadMediaFromFolder() {
-        const mediaGrid = document.querySelector('.media-card-grid');
-        if (!mediaGrid) return;
+    handleFileSelection(files) {
+        const scrollContainer = document.querySelector('.media-scroll-container');
+        if (!scrollContainer) return;
 
-        // Keep the refresh button
-        const refreshBtn = mediaGrid.querySelector('#refreshMediaBtn');
-        mediaGrid.innerHTML = '';
-        if (refreshBtn) mediaGrid.appendChild(refreshBtn);
+        // Keep the add files button
+        const refreshBtn = scrollContainer.querySelector('#refreshMediaBtn');
+        scrollContainer.innerHTML = '';
+        if (refreshBtn) scrollContainer.appendChild(refreshBtn);
 
-        try {
-            // Show loading state
-            const loadingCard = document.createElement('div');
-            loadingCard.className = 'media-card loading-card';
-            loadingCard.innerHTML = `
-                <div class="card-content">
-                    <div class="card-icon">⏳</div>
-                    <div class="card-title">Loading files...</div>
-                    <div class="card-subtitle">Reading folder</div>
-                </div>
-            `;
-            mediaGrid.appendChild(loadingCard);
+        Array.from(files).forEach(file => {
+            const card = document.createElement('div');
+            card.className = 'media-card';
+            card.draggable = true;
 
-            // Read directory using IPC
-            const files = await window.electron.ipcRenderer.invoke('read-directory', this.mediaFolderPath);
+            const fileType = this.getFileType(file.name.split('.').pop());
+            const fileURL = URL.createObjectURL(file);
 
-            // Remove loading card
-            loadingCard.remove();
+            card.dataset.mediaPath = fileURL;
+            card.dataset.mediaType = fileType;
+            card.title = file.name; // Show filename on hover
 
-            // Display files
-            files.forEach(file => {
-                const mediaCard = document.createElement('div');
-                mediaCard.className = 'media-card';
-                mediaCard.dataset.mediaPath = file.path;
-                mediaCard.dataset.mediaType = this.getFileType(file.type);
-                mediaCard.draggable = true;
-                
-                mediaCard.innerHTML = `
-                    <div class="card-content">
-                        <div class="card-thumbnail">
-                            ${this.getFileType(file.type) === 'image' 
-                                ? `<img src="file://${file.path}" alt="${file.name}" onerror="this.parentElement.innerHTML='${this.getFileIcon(this.getFileType(file.type))}'">`
-                                : `<div class="card-icon">${this.getFileIcon(this.getFileType(file.type))}</div>`
-                            }
-                        </div>
-                        <div class="card-title" title="${file.name}">${this.truncateFileName(file.name)}</div>
-                        <div class="card-subtitle">${this.getFileType(file.type)} • ${this.formatFileSize(file.size)}</div>
-                    </div>
-                `;
-
-                this.setupDragListeners(mediaCard);
-                mediaGrid.appendChild(mediaCard);
-            });
-
-            if (files.length === 0) {
-                const emptyCard = document.createElement('div');
-                emptyCard.className = 'media-card empty-card';
-                emptyCard.innerHTML = `
-                    <div class="card-content">
-                        <div class="card-icon">📂</div>
-                        <div class="card-title">Empty Folder</div>
-                        <div class="card-subtitle">No media files found</div>
-                    </div>
-                `;
-                mediaGrid.appendChild(emptyCard);
+            let thumbnailHtml = '';
+            if (fileType === 'image') {
+                thumbnailHtml = `<img src="${fileURL}" alt="${file.name}">`;
+            } else {
+                thumbnailHtml = `<div class="file-icon">${this.getFileIcon(fileType)}</div>`;
             }
 
-        } catch (error) {
-            console.error('Error loading media files:', error);
-            const errorCard = document.createElement('div');
-            errorCard.className = 'media-card error-card';
-            errorCard.innerHTML = `
-                <div class="card-content">
-                    <div class="card-icon">❌</div>
-                    <div class="card-title">Error Loading Files</div>
-                    <div class="card-subtitle">${error.message}</div>
+            card.innerHTML = `
+                <div class="media-thumbnail">
+                    ${thumbnailHtml}
                 </div>
             `;
-            mediaGrid.appendChild(errorCard);
-        }
+
+            this.setupDragListeners(card);
+            scrollContainer.appendChild(card);
+        });
     }
 
     setupDragListeners(card) {
@@ -163,7 +289,7 @@ export default class LocalMediaHandler {
             e.dataTransfer.setData('text/plain', JSON.stringify({
                 path: card.dataset.mediaPath,
                 type: card.dataset.mediaType,
-                name: card.querySelector('.card-title').textContent
+                name: card.title
             }));
             card.classList.add('dragging');
         });
@@ -189,12 +315,9 @@ export default class LocalMediaHandler {
         
         let contentHtml = '';
         if (mediaData.type === 'image') {
-            contentHtml = `<img src="file://${mediaData.path}" alt="${mediaData.name}">`;
+            contentHtml = `<img src="${mediaData.path}" alt="${mediaData.name}">`;
         } else {
-            contentHtml = `
-                <div class="media-item-icon">${this.getFileIcon(mediaData.type)}</div>
-                <div class="media-item-name">${mediaData.name}</div>
-            `;
+            contentHtml = `<div class="file-icon">${this.getFileIcon(mediaData.type)}</div>`;
         }
 
         mediaItem.innerHTML = `
@@ -202,7 +325,7 @@ export default class LocalMediaHandler {
                 ${contentHtml}
                 <div class="media-item-controls">
                     <button class="resize-handle">⤡</button>
-                    <button class="remove-item">&times;</button>
+                    <button class="remove-item">×</button>
                 </div>
             </div>
         `;
@@ -287,24 +410,6 @@ export default class LocalMediaHandler {
             file: '📁'
         };
         return icons[fileType] || '📁';
-    }
-
-    truncateFileName(name, maxLength = 15) {
-        if (name.length <= maxLength) return name;
-        const ext = name.split('.').pop();
-        const nameWithoutExt = name.slice(0, -(ext.length + 1));
-        return nameWithoutExt.slice(0, maxLength - 3) + '...' + ext;
-    }
-
-    formatFileSize(bytes) {
-        const units = ['B', 'KB', 'MB', 'GB'];
-        let size = bytes;
-        let unitIndex = 0;
-        while (size >= 1024 && unitIndex < units.length - 1) {
-            size /= 1024;
-            unitIndex++;
-        }
-        return `${Math.round(size * 10) / 10} ${units[unitIndex]}`;
     }
 }
 
