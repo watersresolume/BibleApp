@@ -32,8 +32,13 @@ export default class LocalMediaHandler {
                 .media-workspace {
                     display: flex;
                     flex-direction: column;
-                    height: 100%;
+                    height: 100vh;
                     background: #1e1e1e;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
                 }
 
                 .media-thumbnails-section {
@@ -42,6 +47,8 @@ export default class LocalMediaHandler {
                     border-bottom: 1px solid #3d3d3d;
                     padding: 10px;
                     overflow: hidden;
+                    position: relative;
+                    z-index: 2;
                 }
 
                 .media-scroll-container {
@@ -50,7 +57,7 @@ export default class LocalMediaHandler {
                     overflow-x: auto;
                     overflow-y: hidden;
                     height: 100%;
-                    padding-bottom: 10px; /* Space for scrollbar */
+                    padding-bottom: 10px;
                     white-space: nowrap;
                 }
 
@@ -125,20 +132,24 @@ export default class LocalMediaHandler {
                     flex: 1;
                     position: relative;
                     overflow: auto;
+                    background: #1e1e1e;
+                    min-height: calc(100vh - 120px);
                 }
 
                 .canvas-content {
                     min-height: 100%;
                     position: relative;
+                    padding: 20px;
                 }
 
                 .canvas-placeholder {
-                    position: absolute;
+                    position: fixed;
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
                     text-align: center;
                     color: #6d6d6d;
+                    pointer-events: none;
                 }
 
                 .canvas-media-item {
@@ -149,6 +160,7 @@ export default class LocalMediaHandler {
                     border-radius: 8px;
                     overflow: hidden;
                     cursor: grab;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                 }
 
                 .canvas-media-item img {
